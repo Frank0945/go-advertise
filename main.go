@@ -4,7 +4,7 @@ import (
 	"github.com/Frank0945/go-advertise/api/gen/advertise"
 	"github.com/Frank0945/go-advertise/api/gen/http/advertise/server"
 	"github.com/Frank0945/go-advertise/internal/config"
-	"github.com/Frank0945/go-advertise/internal/resources/manager"
+	"github.com/Frank0945/go-advertise/internal/resources/manage"
 	"github.com/Frank0945/go-advertise/internal/service"
 	"github.com/Frank0945/go-advertise/pkg/databasefx"
 	"github.com/Frank0945/go-advertise/pkg/goafx/muxfx"
@@ -18,7 +18,7 @@ func main() {
 		config.Module,
 
 		// Features
-		manager.Module,
+		manage.Module,
 
 		// Endpoints
 		fx.Provide(

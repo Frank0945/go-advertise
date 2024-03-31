@@ -7,23 +7,23 @@ import (
 	"go.uber.org/fx"
 )
 
-type AdvertiseHandler interface {
+type ManageHandler interface {
 	Create(context.Context, *api.CreatePayload) error
 	List(context.Context, *api.AdList) ([]*api.Ads, error)
 }
 
 type service struct {
-	AdvertiseHandler
+	ManageHandler
 }
 
 type Params struct {
 	fx.In
 
-	AdHndlr AdvertiseHandler
+	MgHndlr ManageHandler
 }
 
 func New(p Params) api.Service {
 	return &service{
-		AdvertiseHandler: p.AdHndlr,
+		ManageHandler: p.MgHndlr,
 	}
 }
