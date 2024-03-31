@@ -22,8 +22,10 @@ paths:
                   schema:
                     type: integer
                     description: Offset of AD
+                    default: 0
                     example: 0
                     format: int64
+                    minimum: 0
                   example: 0
                 - name: limit
                   in: query
@@ -33,8 +35,10 @@ paths:
                   schema:
                     type: integer
                     description: Limit of AD
+                    default: 5
                     example: 10
                     format: int64
+                    minimum: 1
                   example: 10
                 - name: age_start
                   in: query
@@ -46,6 +50,7 @@ paths:
                     example: 18
                     format: int64
                     minimum: 1
+                    maximum: 100
                   example: 18
                 - name: age_end
                   in: query
@@ -56,6 +61,7 @@ paths:
                     description: End age of target
                     example: 60
                     format: int64
+                    minimum: 1
                     maximum: 100
                   example: 60
                 - name: gender
@@ -157,6 +163,8 @@ components:
                     type: string
                     description: Title of AD
                     example: AD 1
+                    minLength: 1
+                    maxLength: 100
             description: List all ads by filter
             example:
                 end_at: "2024-12-10T03:00:00.000Z"
@@ -175,6 +183,7 @@ components:
                             description: End age of target
                             example: 60
                             format: int64
+                            minimum: 1
                             maximum: 100
                         age_start:
                             type: integer
@@ -182,6 +191,7 @@ components:
                             example: 18
                             format: int64
                             minimum: 1
+                            maximum: 100
                         country:
                             type: string
                             description: Country of target
@@ -224,6 +234,8 @@ components:
                     type: string
                     description: Title of AD
                     example: AD 1
+                    minLength: 1
+                    maxLength: 100
             example:
                 conditions:
                     age_end: 60

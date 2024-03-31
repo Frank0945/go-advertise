@@ -8,6 +8,8 @@
 package client
 
 import (
+	"unicode/utf8"
+
 	advertise "github.com/Frank0945/go-advertise/api/gen/advertise"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -96,6 +98,16 @@ func ValidateAdsResponse(body *AdsResponse) (err error) {
 	}
 	if body.EndAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("end_at", "body"))
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 1, true))
+		}
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) > 100 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 100, false))
+		}
 	}
 	if body.EndAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.end_at", *body.EndAt, goa.FormatDateTime))

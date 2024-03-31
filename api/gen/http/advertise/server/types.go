@@ -8,6 +8,8 @@
 package server
 
 import (
+	"unicode/utf8"
+
 	advertise "github.com/Frank0945/go-advertise/api/gen/advertise"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -113,6 +115,16 @@ func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
 	if body.EndAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("end_at", "body"))
 	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 1, true))
+		}
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) > 100 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 100, false))
+		}
+	}
 	if body.StartAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.start_at", *body.StartAt, goa.FormatDateTime))
 	}
@@ -123,6 +135,16 @@ func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
 		if body.Conditions.AgeStart != nil {
 			if *body.Conditions.AgeStart < 1 {
 				err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_start", *body.Conditions.AgeStart, 1, true))
+			}
+		}
+		if body.Conditions.AgeStart != nil {
+			if *body.Conditions.AgeStart > 100 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_start", *body.Conditions.AgeStart, 100, false))
+			}
+		}
+		if body.Conditions.AgeEnd != nil {
+			if *body.Conditions.AgeEnd < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_end", *body.Conditions.AgeEnd, 1, true))
 			}
 		}
 		if body.Conditions.AgeEnd != nil {

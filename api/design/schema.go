@@ -8,6 +8,8 @@ var Ads = Type("Ads", func() {
 	Description("List all ads by filter")
 
 	Field(0, "title", String, "Title of AD", func() {
+		MinLength(1)
+		MaxLength(100)
 		Example("AD 1")
 	})
 	Field(1, "end_at", String, "End time of AD", func() {
@@ -22,16 +24,22 @@ var AdList = Type("AdList", func() {
 	Description("Search AD payload")
 
 	Field(0, "offset", Int, "Offset of AD", func() {
+		Default(0)
+		Minimum(0)
 		Example(0)
 	})
 	Field(1, "limit", Int, "Limit of AD", func() {
+		Default(5)
+		Minimum(1)
 		Example(10)
 	})
 	Field(2, "age_start", Int, "Start age of target", func() {
 		Minimum(1)
+		Maximum(100)
 		Example(18)
 	})
 	Field(3, "age_end", Int, "End age of target", func() {
+		Minimum(1)
 		Maximum(100)
 		Example(60)
 	})

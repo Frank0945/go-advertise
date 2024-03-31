@@ -21,6 +21,8 @@ var _ = Service("advertise", func() {
 		Description("Create a new edge")
 		Payload(func() {
 			Attribute("title", String, "Title of AD", func() {
+				MinLength(1)
+				MaxLength(100)
 				Example("AD 1")
 			})
 			Attribute("start_at", String, "Start time of AD", func() {
@@ -34,9 +36,11 @@ var _ = Service("advertise", func() {
 			Attribute("conditions", func() {
 				Attribute("age_start", Int, "Start age of target", func() {
 					Minimum(1)
+					Maximum(100)
 					Example(18)
 				})
 				Attribute("age_end", Int, "End age of target", func() {
+					Minimum(1)
 					Maximum(100)
 					Example(60)
 				})

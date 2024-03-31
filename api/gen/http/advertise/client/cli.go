@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"unicode/utf8"
 
 	advertise "github.com/Frank0945/go-advertise/api/gen/advertise"
 	goa "goa.design/goa/v3/pkg"
@@ -26,12 +27,28 @@ func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, e
 		if err != nil {
 			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"conditions\": {\n         \"age_end\": 60,\n         \"age_start\": 18,\n         \"country\": \"TW\",\n         \"gender\": \"M\",\n         \"platform\": \"ios\"\n      },\n      \"end_at\": \"2024-12-10T03:00:00.000Z\",\n      \"start_at\": \"2024-03-10T03:00:00.000Z\",\n      \"title\": \"AD 1\"\n   }'")
 		}
+		if utf8.RuneCountInString(body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", body.Title, utf8.RuneCountInString(body.Title), 1, true))
+		}
+		if utf8.RuneCountInString(body.Title) > 100 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", body.Title, utf8.RuneCountInString(body.Title), 100, false))
+		}
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.start_at", body.StartAt, goa.FormatDateTime))
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.end_at", body.EndAt, goa.FormatDateTime))
 		if body.Conditions != nil {
 			if body.Conditions.AgeStart != nil {
 				if *body.Conditions.AgeStart < 1 {
 					err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_start", *body.Conditions.AgeStart, 1, true))
+				}
+			}
+			if body.Conditions.AgeStart != nil {
+				if *body.Conditions.AgeStart > 100 {
+					err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_start", *body.Conditions.AgeStart, 100, false))
+				}
+			}
+			if body.Conditions.AgeEnd != nil {
+				if *body.Conditions.AgeEnd < 1 {
+					err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_end", *body.Conditions.AgeEnd, 1, true))
 				}
 			}
 			if body.Conditions.AgeEnd != nil {
@@ -100,6 +117,12 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 		if err != nil {
 			return nil, fmt.Errorf("invalid value for offset, must be INT")
 		}
+		if offset < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("offset", offset, 0, true))
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 	var limit int
 	{
@@ -108,6 +131,12 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 		limit = int(v)
 		if err != nil {
 			return nil, fmt.Errorf("invalid value for limit, must be INT")
+		}
+		if limit < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 	var ageStart *int
@@ -123,6 +152,9 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 			if *ageStart < 1 {
 				err = goa.MergeErrors(err, goa.InvalidRangeError("age_start", *ageStart, 1, true))
 			}
+			if *ageStart > 100 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_start", *ageStart, 100, false))
+			}
 			if err != nil {
 				return nil, err
 			}
@@ -137,6 +169,9 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 			ageEnd = &val
 			if err != nil {
 				return nil, fmt.Errorf("invalid value for ageEnd, must be INT")
+			}
+			if *ageEnd < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_end", *ageEnd, 1, true))
 			}
 			if *ageEnd > 100 {
 				err = goa.MergeErrors(err, goa.InvalidRangeError("age_end", *ageEnd, 100, false))

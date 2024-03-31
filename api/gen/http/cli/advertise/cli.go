@@ -60,7 +60,7 @@ func ParseEndpoint(
 
 		advertiseListFlags        = flag.NewFlagSet("list", flag.ExitOnError)
 		advertiseListOffsetFlag   = advertiseListFlags.String("offset", "REQUIRED", "")
-		advertiseListLimitFlag    = advertiseListFlags.String("limit", "REQUIRED", "")
+		advertiseListLimitFlag    = advertiseListFlags.String("limit", "5", "")
 		advertiseListAgeStartFlag = advertiseListFlags.String("age-start", "", "")
 		advertiseListAgeEndFlag   = advertiseListFlags.String("age-end", "", "")
 		advertiseListGenderFlag   = advertiseListFlags.String("gender", "", "")

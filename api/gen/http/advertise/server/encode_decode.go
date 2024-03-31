@@ -89,16 +89,23 @@ func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.De
 			}
 			offset = int(v)
 		}
+		if offset < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("offset", offset, 0, true))
+		}
 		{
 			limitRaw := r.URL.Query().Get("limit")
 			if limitRaw == "" {
 				err = goa.MergeErrors(err, goa.MissingFieldError("limit", "query string"))
+			} else {
+				v, err2 := strconv.ParseInt(limitRaw, 10, strconv.IntSize)
+				if err2 != nil {
+					err = goa.MergeErrors(err, goa.InvalidFieldTypeError("limit", limitRaw, "integer"))
+				}
+				limit = int(v)
 			}
-			v, err2 := strconv.ParseInt(limitRaw, 10, strconv.IntSize)
-			if err2 != nil {
-				err = goa.MergeErrors(err, goa.InvalidFieldTypeError("limit", limitRaw, "integer"))
-			}
-			limit = int(v)
+		}
+		if limit < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
 		}
 		{
 			ageStartRaw := r.URL.Query().Get("age_start")
@@ -116,6 +123,11 @@ func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.De
 				err = goa.MergeErrors(err, goa.InvalidRangeError("age_start", *ageStart, 1, true))
 			}
 		}
+		if ageStart != nil {
+			if *ageStart > 100 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_start", *ageStart, 100, false))
+			}
+		}
 		{
 			ageEndRaw := r.URL.Query().Get("age_end")
 			if ageEndRaw != "" {
@@ -125,6 +137,11 @@ func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.De
 				}
 				pv := int(v)
 				ageEnd = &pv
+			}
+		}
+		if ageEnd != nil {
+			if *ageEnd < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_end", *ageEnd, 1, true))
 			}
 		}
 		if ageEnd != nil {
