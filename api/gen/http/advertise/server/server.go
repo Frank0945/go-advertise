@@ -18,9 +18,9 @@ import (
 
 // Server lists the advertise service endpoint HTTP handlers.
 type Server struct {
-	Mounts []*MountPoint
-	Create http.Handler
-	List   http.Handler
+	Mounts   []*MountPoint
+	CreateAd http.Handler
+	ListAds  http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -50,11 +50,11 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Create", "POST", "/ad"},
-			{"List", "GET", "/ad"},
+			{"CreateAd", "POST", "/ad"},
+			{"ListAds", "GET", "/ad"},
 		},
-		Create: NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
-		List:   NewListHandler(e.List, mux, decoder, encoder, errhandler, formatter),
+		CreateAd: NewCreateAdHandler(e.CreateAd, mux, decoder, encoder, errhandler, formatter),
+		ListAds:  NewListAdsHandler(e.ListAds, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -63,8 +63,8 @@ func (s *Server) Service() string { return "advertise" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.Create = m(s.Create)
-	s.List = m(s.List)
+	s.CreateAd = m(s.CreateAd)
+	s.ListAds = m(s.ListAds)
 }
 
 // MethodNames returns the methods served.
@@ -72,8 +72,8 @@ func (s *Server) MethodNames() []string { return advertise.MethodNames[:] }
 
 // Mount configures the mux to serve the advertise endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountCreateHandler(mux, h.Create)
-	MountListHandler(mux, h.List)
+	MountCreateAdHandler(mux, h.CreateAd)
+	MountListAdsHandler(mux, h.ListAds)
 }
 
 // Mount configures the mux to serve the advertise endpoints.
@@ -81,9 +81,9 @@ func (s *Server) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-// MountCreateHandler configures the mux to serve the "advertise" service
-// "create" endpoint.
-func MountCreateHandler(mux goahttp.Muxer, h http.Handler) {
+// MountCreateAdHandler configures the mux to serve the "advertise" service
+// "create_ad" endpoint.
+func MountCreateAdHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -93,9 +93,9 @@ func MountCreateHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("POST", "/ad", f)
 }
 
-// NewCreateHandler creates a HTTP handler which loads the HTTP request and
-// calls the "advertise" service "create" endpoint.
-func NewCreateHandler(
+// NewCreateAdHandler creates a HTTP handler which loads the HTTP request and
+// calls the "advertise" service "create_ad" endpoint.
+func NewCreateAdHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -104,13 +104,13 @@ func NewCreateHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeCreateRequest(mux, decoder)
-		encodeResponse = EncodeCreateResponse(encoder)
+		decodeRequest  = DecodeCreateAdRequest(mux, decoder)
+		encodeResponse = EncodeCreateAdResponse(encoder)
 		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "create")
+		ctx = context.WithValue(ctx, goa.MethodKey, "create_ad")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "advertise")
 		payload, err := decodeRequest(r)
 		if err != nil {
@@ -132,9 +132,9 @@ func NewCreateHandler(
 	})
 }
 
-// MountListHandler configures the mux to serve the "advertise" service "list"
-// endpoint.
-func MountListHandler(mux goahttp.Muxer, h http.Handler) {
+// MountListAdsHandler configures the mux to serve the "advertise" service
+// "list_ads" endpoint.
+func MountListAdsHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -144,9 +144,9 @@ func MountListHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("GET", "/ad", f)
 }
 
-// NewListHandler creates a HTTP handler which loads the HTTP request and calls
-// the "advertise" service "list" endpoint.
-func NewListHandler(
+// NewListAdsHandler creates a HTTP handler which loads the HTTP request and
+// calls the "advertise" service "list_ads" endpoint.
+func NewListAdsHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -155,13 +155,13 @@ func NewListHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeListRequest(mux, decoder)
-		encodeResponse = EncodeListResponse(encoder)
+		decodeRequest  = DecodeListAdsRequest(mux, decoder)
+		encodeResponse = EncodeListAdsResponse(encoder)
 		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "list")
+		ctx = context.WithValue(ctx, goa.MethodKey, "list_ads")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "advertise")
 		payload, err := decodeRequest(r)
 		if err != nil {

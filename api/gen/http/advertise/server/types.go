@@ -14,9 +14,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// CreateRequestBody is the type of the "advertise" service "create" endpoint
-// HTTP request body.
-type CreateRequestBody struct {
+// CreateAdRequestBody is the type of the "advertise" service "create_ad"
+// endpoint HTTP request body.
+type CreateAdRequestBody struct {
 	// Title of AD
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// Start time of AD
@@ -37,31 +37,47 @@ type CreateRequestBody struct {
 	} `form:"conditions,omitempty" json:"conditions,omitempty" xml:"conditions,omitempty"`
 }
 
-// ListResponseBody is the type of the "advertise" service "list" endpoint HTTP
-// response body.
-type ListResponseBody []*AdsResponse
+// CreateAdResponseBody is the type of the "advertise" service "create_ad"
+// endpoint HTTP response body.
+type CreateAdResponseBody struct {
+	// ID of the AD
+	ID int `form:"id" json:"id" xml:"id"`
+}
 
-// AdsResponse is used to define fields on response body types.
-type AdsResponse struct {
+// ListAdsResponseBody is the type of the "advertise" service "list_ads"
+// endpoint HTTP response body.
+type ListAdsResponseBody []*AdResponse
+
+// AdResponse is used to define fields on response body types.
+type AdResponse struct {
 	// Title of AD
 	Title string `form:"title" json:"title" xml:"title"`
 	// End time of AD
 	EndAt string `form:"end_at" json:"end_at" xml:"end_at"`
 }
 
-// NewListResponseBody builds the HTTP response body from the result of the
-// "list" endpoint of the "advertise" service.
-func NewListResponseBody(res []*advertise.Ads) ListResponseBody {
-	body := make([]*AdsResponse, len(res))
-	for i, val := range res {
-		body[i] = marshalAdvertiseAdsToAdsResponse(val)
+// NewCreateAdResponseBody builds the HTTP response body from the result of the
+// "create_ad" endpoint of the "advertise" service.
+func NewCreateAdResponseBody(res *advertise.CreateAdResult) *CreateAdResponseBody {
+	body := &CreateAdResponseBody{
+		ID: res.ID,
 	}
 	return body
 }
 
-// NewCreatePayload builds a advertise service create endpoint payload.
-func NewCreatePayload(body *CreateRequestBody) *advertise.CreatePayload {
-	v := &advertise.CreatePayload{
+// NewListAdsResponseBody builds the HTTP response body from the result of the
+// "list_ads" endpoint of the "advertise" service.
+func NewListAdsResponseBody(res []*advertise.Ad) ListAdsResponseBody {
+	body := make([]*AdResponse, len(res))
+	for i, val := range res {
+		body[i] = marshalAdvertiseAdToAdResponse(val)
+	}
+	return body
+}
+
+// NewCreateAdPayload builds a advertise service create_ad endpoint payload.
+func NewCreateAdPayload(body *CreateAdRequestBody) *advertise.CreateAdPayload {
+	v := &advertise.CreateAdPayload{
 		Title:   *body.Title,
 		StartAt: *body.StartAt,
 		EndAt:   *body.EndAt,
@@ -90,9 +106,9 @@ func NewCreatePayload(body *CreateRequestBody) *advertise.CreatePayload {
 	return v
 }
 
-// NewListAdList builds a advertise service list endpoint payload.
-func NewListAdList(offset int, limit int, ageStart *int, ageEnd *int, gender *string, country *string, platform *string) *advertise.AdList {
-	v := &advertise.AdList{}
+// NewListAdsAdOverview builds a advertise service list_ads endpoint payload.
+func NewListAdsAdOverview(offset int, limit int, ageStart *int, ageEnd *int, gender *string, country *string, platform *string) *advertise.AdOverview {
+	v := &advertise.AdOverview{}
 	v.Offset = offset
 	v.Limit = limit
 	v.AgeStart = ageStart
@@ -104,8 +120,9 @@ func NewListAdList(offset int, limit int, ageStart *int, ageEnd *int, gender *st
 	return v
 }
 
-// ValidateCreateRequestBody runs the validations defined on CreateRequestBody
-func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
+// ValidateCreateAdRequestBody runs the validations defined on
+// create_ad_request_body
+func ValidateCreateAdRequestBody(body *CreateAdRequestBody) (err error) {
 	if body.Title == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
 	}

@@ -7,12 +7,12 @@
 
 package server
 
-// CreateAdvertisePath returns the URL path to the advertise service create HTTP endpoint.
-func CreateAdvertisePath() string {
+// CreateAdAdvertisePath returns the URL path to the advertise service create_ad HTTP endpoint.
+func CreateAdAdvertisePath() string {
 	return "/ad"
 }
 
-// ListAdvertisePath returns the URL path to the advertise service list HTTP endpoint.
-func ListAdvertisePath() string {
+// ListAdsAdvertisePath returns the URL path to the advertise service list_ads HTTP endpoint.
+func ListAdsAdvertisePath() string {
 	return "/ad"
 }

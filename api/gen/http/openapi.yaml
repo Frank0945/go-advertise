@@ -19,7 +19,7 @@ paths:
                 - advertise
             summary: List all ADs by filter
             description: List all ADs by filter
-            operationId: advertise#list
+            operationId: advertise#list_ads
             parameters:
                 - name: offset
                   in: query
@@ -80,7 +80,7 @@ paths:
                     schema:
                         type: array
                         items:
-                            $ref: '#/definitions/AdsResponse'
+                            $ref: '#/definitions/AdResponse'
             schemes:
                 - http
         post:
@@ -88,13 +88,13 @@ paths:
                 - advertise
             summary: Create a new AD
             description: Create a new edge
-            operationId: advertise#create
+            operationId: advertise#create_ad
             parameters:
-                - name: CreateRequestBody
+                - name: create_ad_request_body
                   in: body
                   required: true
                   schema:
-                    $ref: '#/definitions/AdvertiseCreateRequestBody'
+                    $ref: '#/definitions/AdvertiseCreateAdRequestBody'
                     required:
                         - title
                         - start_at
@@ -102,11 +102,15 @@ paths:
             responses:
                 "201":
                     description: Created response.
+                    schema:
+                        $ref: '#/definitions/AdvertiseCreateAdResponseBody'
+                        required:
+                            - id
             schemes:
                 - http
 definitions:
-    AdsResponse:
-        title: AdsResponse
+    AdResponse:
+        title: AdResponse
         type: object
         properties:
             end_at:
@@ -127,8 +131,8 @@ definitions:
         required:
             - title
             - end_at
-    AdvertiseCreateRequestBody:
-        title: AdvertiseCreateRequestBody
+    AdvertiseCreateAdRequestBody:
+        title: AdvertiseCreateAdRequestBody
         type: object
         properties:
             conditions:
@@ -206,3 +210,16 @@ definitions:
             - title
             - start_at
             - end_at
+    AdvertiseCreateAdResponseBody:
+        title: AdvertiseCreateAdResponseBody
+        type: object
+        properties:
+            id:
+                type: integer
+                description: ID of the AD
+                example: 34
+                format: int64
+        example:
+            id: 34
+        required:
+            - id

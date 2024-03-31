@@ -14,9 +14,9 @@ import (
 // Service is the advertise service interface.
 type Service interface {
 	// Create a new edge
-	Create(context.Context, *CreatePayload) (err error)
+	CreateAd(context.Context, *CreateAdPayload) (res *CreateAdResult, err error)
 	// List all ADs by filter
-	List(context.Context, *AdList) (res []*Ads, err error)
+	ListAds(context.Context, *AdOverview) (res []*Ad, err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -33,10 +33,18 @@ const ServiceName = "advertise"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"create", "list"}
+var MethodNames = [2]string{"create_ad", "list_ads"}
 
-// AdList is the payload type of the advertise service list method.
-type AdList struct {
+// List all ads by filter
+type Ad struct {
+	// Title of AD
+	Title string
+	// End time of AD
+	EndAt string
+}
+
+// AdOverview is the payload type of the advertise service list_ads method.
+type AdOverview struct {
 	// Offset of AD
 	Offset int
 	// Limit of AD
@@ -53,16 +61,9 @@ type AdList struct {
 	Platform *string
 }
 
-// List all ads by filter
-type Ads struct {
-	// Title of AD
-	Title string
-	// End time of AD
-	EndAt string
-}
-
-// CreatePayload is the payload type of the advertise service create method.
-type CreatePayload struct {
+// CreateAdPayload is the payload type of the advertise service create_ad
+// method.
+type CreateAdPayload struct {
 	// Title of AD
 	Title string
 	// Start time of AD
@@ -81,4 +82,10 @@ type CreatePayload struct {
 		// Platform of target
 		Platform *string
 	}
+}
+
+// CreateAdResult is the result type of the advertise service create_ad method.
+type CreateAdResult struct {
+	// ID of the AD
+	ID int
 }

@@ -17,13 +17,13 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildCreatePayload builds the payload for the advertise create endpoint from
-// CLI flags.
-func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, error) {
+// BuildCreateAdPayload builds the payload for the advertise create_ad endpoint
+// from CLI flags.
+func BuildCreateAdPayload(advertiseCreateAdBody string) (*advertise.CreateAdPayload, error) {
 	var err error
-	var body CreateRequestBody
+	var body CreateAdRequestBody
 	{
-		err = json.Unmarshal([]byte(advertiseCreateBody), &body)
+		err = json.Unmarshal([]byte(advertiseCreateAdBody), &body)
 		if err != nil {
 			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"conditions\": {\n         \"age_end\": 60,\n         \"age_start\": 18,\n         \"country\": \"TW\",\n         \"gender\": \"M\",\n         \"platform\": \"ios\"\n      },\n      \"end_at\": \"2024-12-10T03:00:00.000Z\",\n      \"start_at\": \"2024-03-10T03:00:00.000Z\",\n      \"title\": \"AD 1\"\n   }'")
 		}
@@ -76,7 +76,7 @@ func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, e
 			return nil, err
 		}
 	}
-	v := &advertise.CreatePayload{
+	v := &advertise.CreateAdPayload{
 		Title:   body.Title,
 		StartAt: body.StartAt,
 		EndAt:   body.EndAt,
@@ -105,14 +105,14 @@ func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, e
 	return v, nil
 }
 
-// BuildListPayload builds the payload for the advertise list endpoint from CLI
-// flags.
-func BuildListPayload(advertiseListOffset string, advertiseListLimit string, advertiseListAgeStart string, advertiseListAgeEnd string, advertiseListGender string, advertiseListCountry string, advertiseListPlatform string) (*advertise.AdList, error) {
+// BuildListAdsPayload builds the payload for the advertise list_ads endpoint
+// from CLI flags.
+func BuildListAdsPayload(advertiseListAdsOffset string, advertiseListAdsLimit string, advertiseListAdsAgeStart string, advertiseListAdsAgeEnd string, advertiseListAdsGender string, advertiseListAdsCountry string, advertiseListAdsPlatform string) (*advertise.AdOverview, error) {
 	var err error
 	var offset int
 	{
 		var v int64
-		v, err = strconv.ParseInt(advertiseListOffset, 10, strconv.IntSize)
+		v, err = strconv.ParseInt(advertiseListAdsOffset, 10, strconv.IntSize)
 		offset = int(v)
 		if err != nil {
 			return nil, fmt.Errorf("invalid value for offset, must be INT")
@@ -127,7 +127,7 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 	var limit int
 	{
 		var v int64
-		v, err = strconv.ParseInt(advertiseListLimit, 10, strconv.IntSize)
+		v, err = strconv.ParseInt(advertiseListAdsLimit, 10, strconv.IntSize)
 		limit = int(v)
 		if err != nil {
 			return nil, fmt.Errorf("invalid value for limit, must be INT")
@@ -141,9 +141,9 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 	}
 	var ageStart *int
 	{
-		if advertiseListAgeStart != "" {
+		if advertiseListAdsAgeStart != "" {
 			var v int64
-			v, err = strconv.ParseInt(advertiseListAgeStart, 10, strconv.IntSize)
+			v, err = strconv.ParseInt(advertiseListAdsAgeStart, 10, strconv.IntSize)
 			val := int(v)
 			ageStart = &val
 			if err != nil {
@@ -162,9 +162,9 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 	}
 	var ageEnd *int
 	{
-		if advertiseListAgeEnd != "" {
+		if advertiseListAdsAgeEnd != "" {
 			var v int64
-			v, err = strconv.ParseInt(advertiseListAgeEnd, 10, strconv.IntSize)
+			v, err = strconv.ParseInt(advertiseListAdsAgeEnd, 10, strconv.IntSize)
 			val := int(v)
 			ageEnd = &val
 			if err != nil {
@@ -183,8 +183,8 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 	}
 	var gender *string
 	{
-		if advertiseListGender != "" {
-			gender = &advertiseListGender
+		if advertiseListAdsGender != "" {
+			gender = &advertiseListAdsGender
 			if !(*gender == "M" || *gender == "F") {
 				err = goa.MergeErrors(err, goa.InvalidEnumValueError("gender", *gender, []any{"M", "F"}))
 			}
@@ -195,8 +195,8 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 	}
 	var country *string
 	{
-		if advertiseListCountry != "" {
-			country = &advertiseListCountry
+		if advertiseListAdsCountry != "" {
+			country = &advertiseListAdsCountry
 			if !(*country == "TW" || *country == "JP") {
 				err = goa.MergeErrors(err, goa.InvalidEnumValueError("country", *country, []any{"TW", "JP"}))
 			}
@@ -207,8 +207,8 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 	}
 	var platform *string
 	{
-		if advertiseListPlatform != "" {
-			platform = &advertiseListPlatform
+		if advertiseListAdsPlatform != "" {
+			platform = &advertiseListAdsPlatform
 			if !(*platform == "ios" || *platform == "android" || *platform == "web") {
 				err = goa.MergeErrors(err, goa.InvalidEnumValueError("platform", *platform, []any{"ios", "android", "web"}))
 			}
@@ -217,7 +217,7 @@ func BuildListPayload(advertiseListOffset string, advertiseListLimit string, adv
 			}
 		}
 	}
-	v := &advertise.AdList{}
+	v := &advertise.AdOverview{}
 	v.Offset = offset
 	v.Limit = limit
 	v.AgeStart = ageStart

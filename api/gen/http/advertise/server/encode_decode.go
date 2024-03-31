@@ -18,21 +18,24 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// EncodeCreateResponse returns an encoder for responses returned by the
-// advertise create endpoint.
-func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+// EncodeCreateAdResponse returns an encoder for responses returned by the
+// advertise create_ad endpoint.
+func EncodeCreateAdResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(*advertise.CreateAdResult)
+		enc := encoder(ctx, w)
+		body := NewCreateAdResponseBody(res)
 		w.WriteHeader(http.StatusCreated)
-		return nil
+		return enc.Encode(body)
 	}
 }
 
-// DecodeCreateRequest returns a decoder for requests sent to the advertise
-// create endpoint.
-func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
+// DecodeCreateAdRequest returns a decoder for requests sent to the advertise
+// create_ad endpoint.
+func DecodeCreateAdRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
 	return func(r *http.Request) (any, error) {
 		var (
-			body CreateRequestBody
+			body CreateAdRequestBody
 			err  error
 		)
 		err = decoder(r).Decode(&body)
@@ -42,31 +45,31 @@ func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 			}
 			return nil, goa.DecodePayloadError(err.Error())
 		}
-		err = ValidateCreateRequestBody(&body)
+		err = ValidateCreateAdRequestBody(&body)
 		if err != nil {
 			return nil, err
 		}
-		payload := NewCreatePayload(&body)
+		payload := NewCreateAdPayload(&body)
 
 		return payload, nil
 	}
 }
 
-// EncodeListResponse returns an encoder for responses returned by the
-// advertise list endpoint.
-func EncodeListResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+// EncodeListAdsResponse returns an encoder for responses returned by the
+// advertise list_ads endpoint.
+func EncodeListAdsResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.([]*advertise.Ads)
+		res, _ := v.([]*advertise.Ad)
 		enc := encoder(ctx, w)
-		body := NewListResponseBody(res)
+		body := NewListAdsResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
 }
 
-// DecodeListRequest returns a decoder for requests sent to the advertise list
-// endpoint.
-func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
+// DecodeListAdsRequest returns a decoder for requests sent to the advertise
+// list_ads endpoint.
+func DecodeListAdsRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
 	return func(r *http.Request) (any, error) {
 		var (
 			offset   int
@@ -179,16 +182,16 @@ func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.De
 		if err != nil {
 			return nil, err
 		}
-		payload := NewListAdList(offset, limit, ageStart, ageEnd, gender, country, platform)
+		payload := NewListAdsAdOverview(offset, limit, ageStart, ageEnd, gender, country, platform)
 
 		return payload, nil
 	}
 }
 
-// marshalAdvertiseAdsToAdsResponse builds a value of type *AdsResponse from a
-// value of type *advertise.Ads.
-func marshalAdvertiseAdsToAdsResponse(v *advertise.Ads) *AdsResponse {
-	res := &AdsResponse{
+// marshalAdvertiseAdToAdResponse builds a value of type *AdResponse from a
+// value of type *advertise.Ad.
+func marshalAdvertiseAdToAdResponse(v *advertise.Ad) *AdResponse {
+	res := &AdResponse{
 		Title: v.Title,
 		EndAt: v.EndAt,
 	}

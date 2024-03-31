@@ -14,9 +14,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// CreateRequestBody is the type of the "advertise" service "create" endpoint
-// HTTP request body.
-type CreateRequestBody struct {
+// CreateAdRequestBody is the type of the "advertise" service "create_ad"
+// endpoint HTTP request body.
+type CreateAdRequestBody struct {
 	// Title of AD
 	Title string `form:"title" json:"title" xml:"title"`
 	// Start time of AD
@@ -37,22 +37,29 @@ type CreateRequestBody struct {
 	} `form:"conditions,omitempty" json:"conditions,omitempty" xml:"conditions,omitempty"`
 }
 
-// ListResponseBody is the type of the "advertise" service "list" endpoint HTTP
-// response body.
-type ListResponseBody []*AdsResponse
+// CreateAdResponseBody is the type of the "advertise" service "create_ad"
+// endpoint HTTP response body.
+type CreateAdResponseBody struct {
+	// ID of the AD
+	ID *int `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+}
 
-// AdsResponse is used to define fields on response body types.
-type AdsResponse struct {
+// ListAdsResponseBody is the type of the "advertise" service "list_ads"
+// endpoint HTTP response body.
+type ListAdsResponseBody []*AdResponse
+
+// AdResponse is used to define fields on response body types.
+type AdResponse struct {
 	// Title of AD
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// End time of AD
 	EndAt *string `form:"end_at,omitempty" json:"end_at,omitempty" xml:"end_at,omitempty"`
 }
 
-// NewCreateRequestBody builds the HTTP request body from the payload of the
-// "create" endpoint of the "advertise" service.
-func NewCreateRequestBody(p *advertise.CreatePayload) *CreateRequestBody {
-	body := &CreateRequestBody{
+// NewCreateAdRequestBody builds the HTTP request body from the payload of the
+// "create_ad" endpoint of the "advertise" service.
+func NewCreateAdRequestBody(p *advertise.CreateAdPayload) *CreateAdRequestBody {
+	body := &CreateAdRequestBody{
 		Title:   p.Title,
 		StartAt: p.StartAt,
 		EndAt:   p.EndAt,
@@ -80,19 +87,38 @@ func NewCreateRequestBody(p *advertise.CreatePayload) *CreateRequestBody {
 	return body
 }
 
-// NewListAdsOK builds a "advertise" service "list" endpoint result from a HTTP
-// "OK" response.
-func NewListAdsOK(body []*AdsResponse) []*advertise.Ads {
-	v := make([]*advertise.Ads, len(body))
-	for i, val := range body {
-		v[i] = unmarshalAdsResponseToAdvertiseAds(val)
+// NewCreateAdResultCreated builds a "advertise" service "create_ad" endpoint
+// result from a HTTP "Created" response.
+func NewCreateAdResultCreated(body *CreateAdResponseBody) *advertise.CreateAdResult {
+	v := &advertise.CreateAdResult{
+		ID: *body.ID,
 	}
 
 	return v
 }
 
-// ValidateAdsResponse runs the validations defined on AdsResponse
-func ValidateAdsResponse(body *AdsResponse) (err error) {
+// NewListAdsAdOK builds a "advertise" service "list_ads" endpoint result from
+// a HTTP "OK" response.
+func NewListAdsAdOK(body []*AdResponse) []*advertise.Ad {
+	v := make([]*advertise.Ad, len(body))
+	for i, val := range body {
+		v[i] = unmarshalAdResponseToAdvertiseAd(val)
+	}
+
+	return v
+}
+
+// ValidateCreateAdResponseBody runs the validations defined on
+// create_ad_response_body
+func ValidateCreateAdResponseBody(body *CreateAdResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	return
+}
+
+// ValidateAdResponse runs the validations defined on AdResponse
+func ValidateAdResponse(body *AdResponse) (err error) {
 	if body.Title == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
 	}

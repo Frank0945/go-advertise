@@ -20,13 +20,13 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildCreateRequest instantiates a HTTP request object with method and path
-// set to call the "advertise" service "create" endpoint
-func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateAdvertisePath()}
+// BuildCreateAdRequest instantiates a HTTP request object with method and path
+// set to call the "advertise" service "create_ad" endpoint
+func (c *Client) BuildCreateAdRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateAdAdvertisePath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("advertise", "create", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("advertise", "create_ad", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -35,26 +35,26 @@ func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
-// EncodeCreateRequest returns an encoder for requests sent to the advertise
-// create server.
-func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+// EncodeCreateAdRequest returns an encoder for requests sent to the advertise
+// create_ad server.
+func EncodeCreateAdRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*advertise.CreatePayload)
+		p, ok := v.(*advertise.CreateAdPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("advertise", "create", "*advertise.CreatePayload", v)
+			return goahttp.ErrInvalidType("advertise", "create_ad", "*advertise.CreateAdPayload", v)
 		}
-		body := NewCreateRequestBody(p)
+		body := NewCreateAdRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("advertise", "create", err)
+			return goahttp.ErrEncodingError("advertise", "create_ad", err)
 		}
 		return nil
 	}
 }
 
-// DecodeCreateResponse returns a decoder for responses returned by the
-// advertise create endpoint. restoreBody controls whether the response body
+// DecodeCreateAdResponse returns a decoder for responses returned by the
+// advertise create_ad endpoint. restoreBody controls whether the response body
 // should be restored after having been read.
-func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+func DecodeCreateAdResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
@@ -70,21 +70,34 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		}
 		switch resp.StatusCode {
 		case http.StatusCreated:
-			return nil, nil
+			var (
+				body CreateAdResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("advertise", "create_ad", err)
+			}
+			err = ValidateCreateAdResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("advertise", "create_ad", err)
+			}
+			res := NewCreateAdResultCreated(&body)
+			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("advertise", "create", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("advertise", "create_ad", resp.StatusCode, string(body))
 		}
 	}
 }
 
-// BuildListRequest instantiates a HTTP request object with method and path set
-// to call the "advertise" service "list" endpoint
-func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListAdvertisePath()}
+// BuildListAdsRequest instantiates a HTTP request object with method and path
+// set to call the "advertise" service "list_ads" endpoint
+func (c *Client) BuildListAdsRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListAdsAdvertisePath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("advertise", "list", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("advertise", "list_ads", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -93,13 +106,13 @@ func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, er
 	return req, nil
 }
 
-// EncodeListRequest returns an encoder for requests sent to the advertise list
-// server.
-func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+// EncodeListAdsRequest returns an encoder for requests sent to the advertise
+// list_ads server.
+func EncodeListAdsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*advertise.AdList)
+		p, ok := v.(*advertise.AdOverview)
 		if !ok {
-			return goahttp.ErrInvalidType("advertise", "list", "*advertise.AdList", v)
+			return goahttp.ErrInvalidType("advertise", "list_ads", "*advertise.AdOverview", v)
 		}
 		values := req.URL.Query()
 		values.Add("offset", fmt.Sprintf("%v", p.Offset))
@@ -124,10 +137,10 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 	}
 }
 
-// DecodeListResponse returns a decoder for responses returned by the advertise
-// list endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
-func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+// DecodeListAdsResponse returns a decoder for responses returned by the
+// advertise list_ads endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+func DecodeListAdsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
@@ -144,36 +157,36 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body ListResponseBody
+				body ListAdsResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("advertise", "list", err)
+				return nil, goahttp.ErrDecodingError("advertise", "list_ads", err)
 			}
 			for _, e := range body {
 				if e != nil {
-					if err2 := ValidateAdsResponse(e); err2 != nil {
+					if err2 := ValidateAdResponse(e); err2 != nil {
 						err = goa.MergeErrors(err, err2)
 					}
 				}
 			}
 			if err != nil {
-				return nil, goahttp.ErrValidationError("advertise", "list", err)
+				return nil, goahttp.ErrValidationError("advertise", "list_ads", err)
 			}
-			res := NewListAdsOK(body)
+			res := NewListAdsAdOK(body)
 			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("advertise", "list", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("advertise", "list_ads", resp.StatusCode, string(body))
 		}
 	}
 }
 
-// unmarshalAdsResponseToAdvertiseAds builds a value of type *advertise.Ads
-// from a value of type *AdsResponse.
-func unmarshalAdsResponseToAdvertiseAds(v *AdsResponse) *advertise.Ads {
-	res := &advertise.Ads{
+// unmarshalAdResponseToAdvertiseAd builds a value of type *advertise.Ad from a
+// value of type *AdResponse.
+func unmarshalAdResponseToAdvertiseAd(v *AdResponse) *advertise.Ad {
+	res := &advertise.Ad{
 		Title: *v.Title,
 		EndAt: *v.EndAt,
 	}

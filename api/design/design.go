@@ -16,7 +16,7 @@ var _ = API("advertise", func() {
 })
 
 var _ = Service("advertise", func() {
-	Method("create", func() {
+	Method("create_ad", func() {
 		Meta("openapi:summary", "Create a new AD")
 		Description("Create a new edge")
 		Payload(func() {
@@ -60,19 +60,26 @@ var _ = Service("advertise", func() {
 
 			Required("title", "start_at", "end_at")
 		})
-		Result(Empty)
+		Result(func() {
+			Field(1, "id", Int, "ID of the AD", func() {
+				Example(34)
+			})
+
+			Required("id")
+		})
+
 		HTTP(func() {
 			POST("ad")
 			Response(StatusCreated)
 		})
 	})
 
-	Method("list", func() {
+	Method("list_ads", func() {
 		Meta("openapi:summary", "List all ADs by filter")
 		Description("List all ADs by filter")
 
-		Payload(AdList)
-		Result(ArrayOf(Ads))
+		Payload(AdOverview)
+		Result(ArrayOf(Ad))
 		HTTP(func() {
 			GET("ad")
 

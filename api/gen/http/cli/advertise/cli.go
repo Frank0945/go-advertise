@@ -22,13 +22,13 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `advertise (create|list)
+	return `advertise (create-ad|list-ads)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` advertise create --body '{
+	return os.Args[0] + ` advertise create-ad --body '{
       "conditions": {
          "age_end": 60,
          "age_start": 18,
@@ -55,21 +55,21 @@ func ParseEndpoint(
 	var (
 		advertiseFlags = flag.NewFlagSet("advertise", flag.ContinueOnError)
 
-		advertiseCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
-		advertiseCreateBodyFlag = advertiseCreateFlags.String("body", "REQUIRED", "")
+		advertiseCreateAdFlags    = flag.NewFlagSet("create-ad", flag.ExitOnError)
+		advertiseCreateAdBodyFlag = advertiseCreateAdFlags.String("body", "REQUIRED", "")
 
-		advertiseListFlags        = flag.NewFlagSet("list", flag.ExitOnError)
-		advertiseListOffsetFlag   = advertiseListFlags.String("offset", "REQUIRED", "")
-		advertiseListLimitFlag    = advertiseListFlags.String("limit", "5", "")
-		advertiseListAgeStartFlag = advertiseListFlags.String("age-start", "", "")
-		advertiseListAgeEndFlag   = advertiseListFlags.String("age-end", "", "")
-		advertiseListGenderFlag   = advertiseListFlags.String("gender", "", "")
-		advertiseListCountryFlag  = advertiseListFlags.String("country", "", "")
-		advertiseListPlatformFlag = advertiseListFlags.String("platform", "", "")
+		advertiseListAdsFlags        = flag.NewFlagSet("list-ads", flag.ExitOnError)
+		advertiseListAdsOffsetFlag   = advertiseListAdsFlags.String("offset", "REQUIRED", "")
+		advertiseListAdsLimitFlag    = advertiseListAdsFlags.String("limit", "5", "")
+		advertiseListAdsAgeStartFlag = advertiseListAdsFlags.String("age-start", "", "")
+		advertiseListAdsAgeEndFlag   = advertiseListAdsFlags.String("age-end", "", "")
+		advertiseListAdsGenderFlag   = advertiseListAdsFlags.String("gender", "", "")
+		advertiseListAdsCountryFlag  = advertiseListAdsFlags.String("country", "", "")
+		advertiseListAdsPlatformFlag = advertiseListAdsFlags.String("platform", "", "")
 	)
 	advertiseFlags.Usage = advertiseUsage
-	advertiseCreateFlags.Usage = advertiseCreateUsage
-	advertiseListFlags.Usage = advertiseListUsage
+	advertiseCreateAdFlags.Usage = advertiseCreateAdUsage
+	advertiseListAdsFlags.Usage = advertiseListAdsUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -105,11 +105,11 @@ func ParseEndpoint(
 		switch svcn {
 		case "advertise":
 			switch epn {
-			case "create":
-				epf = advertiseCreateFlags
+			case "create-ad":
+				epf = advertiseCreateAdFlags
 
-			case "list":
-				epf = advertiseListFlags
+			case "list-ads":
+				epf = advertiseListAdsFlags
 
 			}
 
@@ -136,12 +136,12 @@ func ParseEndpoint(
 		case "advertise":
 			c := advertisec.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "create":
-				endpoint = c.Create()
-				data, err = advertisec.BuildCreatePayload(*advertiseCreateBodyFlag)
-			case "list":
-				endpoint = c.List()
-				data, err = advertisec.BuildListPayload(*advertiseListOffsetFlag, *advertiseListLimitFlag, *advertiseListAgeStartFlag, *advertiseListAgeEndFlag, *advertiseListGenderFlag, *advertiseListCountryFlag, *advertiseListPlatformFlag)
+			case "create-ad":
+				endpoint = c.CreateAd()
+				data, err = advertisec.BuildCreateAdPayload(*advertiseCreateAdBodyFlag)
+			case "list-ads":
+				endpoint = c.ListAds()
+				data, err = advertisec.BuildListAdsPayload(*advertiseListAdsOffsetFlag, *advertiseListAdsLimitFlag, *advertiseListAdsAgeStartFlag, *advertiseListAdsAgeEndFlag, *advertiseListAdsGenderFlag, *advertiseListAdsCountryFlag, *advertiseListAdsPlatformFlag)
 			}
 		}
 	}
@@ -160,21 +160,21 @@ Usage:
     %[1]s [globalflags] advertise COMMAND [flags]
 
 COMMAND:
-    create: Create a new edge
-    list: List all ADs by filter
+    create-ad: Create a new edge
+    list-ads: List all ADs by filter
 
 Additional help:
     %[1]s advertise COMMAND --help
 `, os.Args[0])
 }
-func advertiseCreateUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] advertise create -body JSON
+func advertiseCreateAdUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] advertise create-ad -body JSON
 
 Create a new edge
     -body JSON: 
 
 Example:
-    %[1]s advertise create --body '{
+    %[1]s advertise create-ad --body '{
       "conditions": {
          "age_end": 60,
          "age_start": 18,
@@ -189,8 +189,8 @@ Example:
 `, os.Args[0])
 }
 
-func advertiseListUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] advertise list -offset INT -limit INT -age-start INT -age-end INT -gender STRING -country STRING -platform STRING
+func advertiseListAdsUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] advertise list-ads -offset INT -limit INT -age-start INT -age-end INT -gender STRING -country STRING -platform STRING
 
 List all ADs by filter
     -offset INT: 
@@ -202,6 +202,6 @@ List all ADs by filter
     -platform STRING: 
 
 Example:
-    %[1]s advertise list --offset 0 --limit 10 --age-start 18 --age-end 60 --gender "M" --country "TW" --platform "ios"
+    %[1]s advertise list-ads --offset 0 --limit 10 --age-start 18 --age-end 60 --gender "M" --country "TW" --platform "ios"
 `, os.Args[0])
 }

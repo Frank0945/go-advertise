@@ -8,8 +8,8 @@ import (
 )
 
 type ManageHandler interface {
-	Create(context.Context, *api.CreatePayload) error
-	List(context.Context, *api.AdList) ([]*api.Ads, error)
+	CreateAd(context.Context, *api.CreateAdPayload) (*api.CreateAdResult, error)
+	ListAds(context.Context, *api.AdOverview) ([]*api.Ad, error)
 }
 
 type service struct {

@@ -12,7 +12,7 @@ paths:
                 - advertise
             summary: List all ADs by filter
             description: List all ADs by filter
-            operationId: advertise#list
+            operationId: advertise#list_ads
             parameters:
                 - name: offset
                   in: query
@@ -109,7 +109,7 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/Ads'
+                                    $ref: '#/components/schemas/Ad'
                                 example:
                                     - end_at: "2024-12-10T03:00:00.000Z"
                                       title: AD 1
@@ -129,13 +129,13 @@ paths:
                 - advertise
             summary: Create a new AD
             description: Create a new edge
-            operationId: advertise#create
+            operationId: advertise#create_ad
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateRequestBody'
+                            $ref: '#/components/schemas/CreateAdRequestBody'
                         example:
                             conditions:
                                 age_end: 60
@@ -149,9 +149,15 @@ paths:
             responses:
                 "201":
                     description: Created response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateAdResponseBody'
+                            example:
+                                id: 34
 components:
     schemas:
-        Ads:
+        Ad:
             type: object
             properties:
                 end_at:
@@ -172,7 +178,7 @@ components:
             required:
                 - title
                 - end_at
-        CreateRequestBody:
+        CreateAdRequestBody:
             type: object
             properties:
                 conditions:
@@ -250,5 +256,17 @@ components:
                 - title
                 - start_at
                 - end_at
+        CreateAdResponseBody:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: ID of the AD
+                    example: 34
+                    format: int64
+            example:
+                id: 34
+            required:
+                - id
 tags:
     - name: advertise

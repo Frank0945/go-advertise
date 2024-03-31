@@ -17,11 +17,13 @@ import (
 
 // Client lists the advertise service endpoint HTTP clients.
 type Client struct {
-	// Create Doer is the HTTP client used to make requests to the create endpoint.
-	CreateDoer goahttp.Doer
+	// CreateAd Doer is the HTTP client used to make requests to the create_ad
+	// endpoint.
+	CreateAdDoer goahttp.Doer
 
-	// List Doer is the HTTP client used to make requests to the list endpoint.
-	ListDoer goahttp.Doer
+	// ListAds Doer is the HTTP client used to make requests to the list_ads
+	// endpoint.
+	ListAdsDoer goahttp.Doer
 
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
@@ -43,8 +45,8 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		CreateDoer:          doer,
-		ListDoer:            doer,
+		CreateAdDoer:        doer,
+		ListAdsDoer:         doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -53,15 +55,15 @@ func NewClient(
 	}
 }
 
-// Create returns an endpoint that makes HTTP requests to the advertise service
-// create server.
-func (c *Client) Create() goa.Endpoint {
+// CreateAd returns an endpoint that makes HTTP requests to the advertise
+// service create_ad server.
+func (c *Client) CreateAd() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeCreateRequest(c.encoder)
-		decodeResponse = DecodeCreateResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeCreateAdRequest(c.encoder)
+		decodeResponse = DecodeCreateAdResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildCreateRequest(ctx, v)
+		req, err := c.BuildCreateAdRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -69,23 +71,23 @@ func (c *Client) Create() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.CreateDoer.Do(req)
+		resp, err := c.CreateAdDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("advertise", "create", err)
+			return nil, goahttp.ErrRequestError("advertise", "create_ad", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the advertise service
-// list server.
-func (c *Client) List() goa.Endpoint {
+// ListAds returns an endpoint that makes HTTP requests to the advertise
+// service list_ads server.
+func (c *Client) ListAds() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeListRequest(c.encoder)
-		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeListAdsRequest(c.encoder)
+		decodeResponse = DecodeListAdsResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildListRequest(ctx, v)
+		req, err := c.BuildListAdsRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -93,9 +95,9 @@ func (c *Client) List() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ListDoer.Do(req)
+		resp, err := c.ListAdsDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("advertise", "list", err)
+			return nil, goahttp.ErrRequestError("advertise", "list_ads", err)
 		}
 		return decodeResponse(resp)
 	}

@@ -15,30 +15,34 @@ import (
 
 // Client is the "advertise" service client.
 type Client struct {
-	CreateEndpoint goa.Endpoint
-	ListEndpoint   goa.Endpoint
+	CreateAdEndpoint goa.Endpoint
+	ListAdsEndpoint  goa.Endpoint
 }
 
 // NewClient initializes a "advertise" service client given the endpoints.
-func NewClient(create, list goa.Endpoint) *Client {
+func NewClient(createAd, listAds goa.Endpoint) *Client {
 	return &Client{
-		CreateEndpoint: create,
-		ListEndpoint:   list,
+		CreateAdEndpoint: createAd,
+		ListAdsEndpoint:  listAds,
 	}
 }
 
-// Create calls the "create" endpoint of the "advertise" service.
-func (c *Client) Create(ctx context.Context, p *CreatePayload) (err error) {
-	_, err = c.CreateEndpoint(ctx, p)
-	return
-}
-
-// List calls the "list" endpoint of the "advertise" service.
-func (c *Client) List(ctx context.Context, p *AdList) (res []*Ads, err error) {
+// CreateAd calls the "create_ad" endpoint of the "advertise" service.
+func (c *Client) CreateAd(ctx context.Context, p *CreateAdPayload) (res *CreateAdResult, err error) {
 	var ires any
-	ires, err = c.ListEndpoint(ctx, p)
+	ires, err = c.CreateAdEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.([]*Ads), nil
+	return ires.(*CreateAdResult), nil
+}
+
+// ListAds calls the "list_ads" endpoint of the "advertise" service.
+func (c *Client) ListAds(ctx context.Context, p *AdOverview) (res []*Ad, err error) {
+	var ires any
+	ires, err = c.ListAdsEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.([]*Ad), nil
 }

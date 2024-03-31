@@ -4,7 +4,7 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-var Ads = Type("Ads", func() {
+var Ad = Type("Ad", func() {
 	Description("List all ads by filter")
 
 	Field(0, "title", String, "Title of AD", func() {
@@ -20,7 +20,7 @@ var Ads = Type("Ads", func() {
 	Required("title", "end_at")
 })
 
-var AdList = Type("AdList", func() {
+var AdOverview = Type("AdOverview", func() {
 	Description("Search AD payload")
 
 	Field(0, "offset", Int, "Offset of AD", func() {

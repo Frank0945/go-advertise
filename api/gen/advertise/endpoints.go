@@ -15,38 +15,38 @@ import (
 
 // Endpoints wraps the "advertise" service endpoints.
 type Endpoints struct {
-	Create goa.Endpoint
-	List   goa.Endpoint
+	CreateAd goa.Endpoint
+	ListAds  goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "advertise" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Create: NewCreateEndpoint(s),
-		List:   NewListEndpoint(s),
+		CreateAd: NewCreateAdEndpoint(s),
+		ListAds:  NewListAdsEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "advertise" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.Create = m(e.Create)
-	e.List = m(e.List)
+	e.CreateAd = m(e.CreateAd)
+	e.ListAds = m(e.ListAds)
 }
 
-// NewCreateEndpoint returns an endpoint function that calls the method
-// "create" of service "advertise".
-func NewCreateEndpoint(s Service) goa.Endpoint {
+// NewCreateAdEndpoint returns an endpoint function that calls the method
+// "create_ad" of service "advertise".
+func NewCreateAdEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*CreatePayload)
-		return nil, s.Create(ctx, p)
+		p := req.(*CreateAdPayload)
+		return s.CreateAd(ctx, p)
 	}
 }
 
-// NewListEndpoint returns an endpoint function that calls the method "list" of
-// service "advertise".
-func NewListEndpoint(s Service) goa.Endpoint {
+// NewListAdsEndpoint returns an endpoint function that calls the method
+// "list_ads" of service "advertise".
+func NewListAdsEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*AdList)
-		return s.List(ctx, p)
+		p := req.(*AdOverview)
+		return s.ListAds(ctx, p)
 	}
 }
