@@ -6,6 +6,7 @@ import (
 	"github.com/Frank0945/go-advertise/internal/config"
 	"github.com/Frank0945/go-advertise/internal/resources/manager"
 	"github.com/Frank0945/go-advertise/internal/service"
+	"github.com/Frank0945/go-advertise/pkg/databasefx"
 	"github.com/Frank0945/go-advertise/pkg/goafx/muxfx"
 	"github.com/Frank0945/go-advertise/pkg/httpfx"
 	"go.uber.org/fx"
@@ -13,6 +14,7 @@ import (
 
 func main() {
 	fx.New(
+		databasefx.Module,
 		config.Module,
 
 		// Features
