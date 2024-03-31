@@ -3,7 +3,7 @@
 // ad HTTP client CLI support package
 //
 // Command:
-// $ goa gen github.com/Frank0945/advertise/api/design -o api
+// $ goa gen github.com/Frank0945/go-advertise/api/design -o api
 
 package cli
 
@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	adc "github.com/Frank0945/advertise/api/gen/http/ad/client"
+	adc "github.com/Frank0945/go-advertise/api/gen/http/ad/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )

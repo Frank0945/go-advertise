@@ -3,7 +3,7 @@
 // ad client
 //
 // Command:
-// $ goa gen github.com/Frank0945/advertise/api/design -o api
+// $ goa gen github.com/Frank0945/go-advertise/api/design -o api
 
 package ad
 

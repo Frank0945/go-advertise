@@ -1,4 +1,4 @@
-module github.com/Frank0945/advertise
+module github.com/Frank0945/go-advertise
 
 go 1.22.1
 

@@ -3,7 +3,7 @@
 // ad HTTP client encoders and decoders
 //
 // Command:
-// $ goa gen github.com/Frank0945/advertise/api/design -o api
+// $ goa gen github.com/Frank0945/go-advertise/api/design -o api
 
 package client
 
@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"net/url"
 
-	ad "github.com/Frank0945/advertise/api/gen/ad"
+	ad "github.com/Frank0945/go-advertise/api/gen/ad"
 	goahttp "goa.design/goa/v3/http"
 )
 

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Frank0945/advertise/internal/config"
-	"github.com/Frank0945/advertise/pkg/goafx"
+	"github.com/Frank0945/go-advertise/internal/config"
+	"github.com/Frank0945/go-advertise/pkg/goafx"
 
-	apisvr "github.com/Frank0945/advertise/api/gen/http/ad/server"
+	apisvr "github.com/Frank0945/go-advertise/api/gen/http/ad/server"
 
 	"go.uber.org/fx"
 	goahttp "goa.design/goa/v3/http"

@@ -3,12 +3,12 @@
 // ad HTTP client types
 //
 // Command:
-// $ goa gen github.com/Frank0945/advertise/api/design -o api
+// $ goa gen github.com/Frank0945/go-advertise/api/design -o api
 
 package client
 
 import (
-	ad "github.com/Frank0945/advertise/api/gen/ad"
+	ad "github.com/Frank0945/go-advertise/api/gen/ad"
 	goa "goa.design/goa/v3/pkg"
 )
 
