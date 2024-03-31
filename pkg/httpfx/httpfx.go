@@ -8,7 +8,7 @@ import (
 	"github.com/Frank0945/go-advertise/internal/config"
 	"github.com/Frank0945/go-advertise/pkg/goafx"
 
-	apisvr "github.com/Frank0945/go-advertise/api/gen/http/ad/server"
+	apisvr "github.com/Frank0945/go-advertise/api/gen/http/advertise/server"
 
 	"go.uber.org/fx"
 	goahttp "goa.design/goa/v3/http"

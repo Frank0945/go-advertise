@@ -1,6 +1,6 @@
 {
   "recommendations": [
     "golang.go",
-    "esbenp.prettier-vscode",
+    "42Crunch.vscode-openapi",
   ]
 }

@@ -20,7 +20,7 @@ type DataBaseConfig struct {
 	Host     string `env:"HOST"         envDefault:"localhost"`
 	User     string `env:"USER"         envDefault:"postgres"`
 	Password string `env:"PASSWORD"     envDefault:"postgres"`
-	Database string `env:"DATABASE"     envDefault:"importer"`
+	Database string `env:"DATABASE"     envDefault:"advertise"`
 }
 
 // New returns a new Config struct with values from environment variables.

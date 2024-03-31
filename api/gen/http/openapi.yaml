@@ -16,16 +16,16 @@ paths:
     /ad:
         get:
             tags:
-                - ad
+                - advertise
             summary: List all ADs by filter
             description: List all ADs by filter
-            operationId: ad#list
+            operationId: advertise#list
             parameters:
                 - name: ListRequestBody
                   in: body
                   required: true
                   schema:
-                    $ref: '#/definitions/AdListRequestBody'
+                    $ref: '#/definitions/AdvertiseListRequestBody'
                     required:
                         - offset
                         - limit
@@ -33,24 +33,23 @@ paths:
                 "200":
                     description: OK response.
                     schema:
-                        $ref: '#/definitions/AdListResponseBody'
-                        required:
-                            - title
-                            - end_at
+                        type: array
+                        items:
+                            $ref: '#/definitions/AdsResponse'
             schemes:
                 - http
         post:
             tags:
-                - ad
+                - advertise
             summary: Create a new AD
             description: Create a new edge
-            operationId: ad#create
+            operationId: advertise#create
             parameters:
                 - name: CreateRequestBody
                   in: body
                   required: true
                   schema:
-                    $ref: '#/definitions/AdCreateRequestBody'
+                    $ref: '#/definitions/AdvertiseCreateRequestBody'
                     required:
                         - title
                         - start_at
@@ -61,8 +60,27 @@ paths:
             schemes:
                 - http
 definitions:
-    AdCreateRequestBody:
-        title: AdCreateRequestBody
+    AdsResponse:
+        title: AdsResponse
+        type: object
+        properties:
+            end_at:
+                type: string
+                description: End time of AD
+                example: "2024-10-01 00:00:00"
+            title:
+                type: string
+                description: Title of AD
+                example: AD 1
+        description: List all ads by filter
+        example:
+            end_at: "2024-10-01 00:00:00"
+            title: AD 1
+        required:
+            - title
+            - end_at
+    AdvertiseCreateRequestBody:
+        title: AdvertiseCreateRequestBody
         type: object
         properties:
             Country:
@@ -124,8 +142,8 @@ definitions:
             - title
             - start_at
             - end_at
-    AdListRequestBody:
-        title: AdListRequestBody
+    AdvertiseListRequestBody:
+        title: AdvertiseListRequestBody
         type: object
         properties:
             Country:
@@ -183,21 +201,3 @@ definitions:
         required:
             - offset
             - limit
-    AdListResponseBody:
-        title: AdListResponseBody
-        type: object
-        properties:
-            end_at:
-                type: string
-                description: End time of AD
-                example: "2024-10-01 00:00:00"
-            title:
-                type: string
-                description: Title of AD
-                example: AD 1
-        example:
-            end_at: "2024-10-01 00:00:00"
-            title: AD 1
-        required:
-            - title
-            - end_at

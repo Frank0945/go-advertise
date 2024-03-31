@@ -17,7 +17,7 @@ var Ads = Type("Ads", func() {
 	Required("title", "end_at")
 })
 
-var AdSearchPayload = Type("AdSearchPayload", func() {
+var AdList = Type("AdList", func() {
 	Description("Search AD payload")
 
 	Field(0, "offset", Int, "Offset of AD", func() {

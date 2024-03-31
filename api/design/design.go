@@ -4,18 +4,18 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-var _ = API("ad", func() {
+var _ = API("advertise", func() {
 	Title("AD Service")
 	Description("This service provides the AD service")
-	Server("ad", func() {
+	Server("advertise", func() {
 		Host("localhost", func() {
 			URI("http://localhost:8000")
 		})
-		Services("ad")
+		Services("advertise")
 	})
 })
 
-var _ = Service("ad", func() {
+var _ = Service("advertise", func() {
 	Method("create", func() {
 		Meta("openapi:summary", "Create a new AD")
 		Description("Create a new edge")
@@ -63,8 +63,8 @@ var _ = Service("ad", func() {
 		Meta("openapi:summary", "List all ADs by filter")
 		Description("List all ADs by filter")
 
-		Payload(AdSearchPayload)
-		Result(Ads)
+		Payload(AdList)
+		Result(ArrayOf(Ads))
 		HTTP(func() {
 			GET("ad")
 

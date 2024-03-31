@@ -9,10 +9,10 @@ paths:
     /ad:
         get:
             tags:
-                - ad
+                - advertise
             summary: List all ADs by filter
             description: List all ADs by filter
-            operationId: ad#list
+            operationId: advertise#list
             requestBody:
                 required: true
                 content:
@@ -33,16 +33,29 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Ads'
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Ads'
+                                example:
+                                    - end_at: "2024-10-01 00:00:00"
+                                      title: AD 1
+                                    - end_at: "2024-10-01 00:00:00"
+                                      title: AD 1
+                                    - end_at: "2024-10-01 00:00:00"
+                                      title: AD 1
+                                    - end_at: "2024-10-01 00:00:00"
+                                      title: AD 1
                             example:
-                                end_at: "2024-10-01 00:00:00"
-                                title: AD 1
+                                - end_at: "2024-10-01 00:00:00"
+                                  title: AD 1
+                                - end_at: "2024-10-01 00:00:00"
+                                  title: AD 1
         post:
             tags:
-                - ad
+                - advertise
             summary: Create a new AD
             description: Create a new edge
-            operationId: ad#create
+            operationId: advertise#create
             requestBody:
                 required: true
                 content:
@@ -74,6 +87,7 @@ components:
                     type: string
                     description: Title of AD
                     example: AD 1
+            description: List all ads by filter
             example:
                 end_at: "2024-10-01 00:00:00"
                 title: AD 1
@@ -201,4 +215,4 @@ components:
                 - offset
                 - limit
 tags:
-    - name: ad
+    - name: advertise
