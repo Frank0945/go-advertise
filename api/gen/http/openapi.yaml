@@ -1,0 +1,203 @@
+swagger: "2.0"
+info:
+    title: AD Service
+    description: This service provides the AD service
+    version: 0.0.1
+host: localhost:8000
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /ad:
+        get:
+            tags:
+                - ad
+            summary: List all ADs by filter
+            description: List all ADs by filter
+            operationId: ad#list
+            parameters:
+                - name: ListRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/AdListRequestBody'
+                    required:
+                        - offset
+                        - limit
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/AdListResponseBody'
+                        required:
+                            - title
+                            - end_at
+            schemes:
+                - http
+        post:
+            tags:
+                - ad
+            summary: Create a new AD
+            description: Create a new edge
+            operationId: ad#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/AdCreateRequestBody'
+                    required:
+                        - title
+                        - start_at
+                        - end_at
+            responses:
+                "201":
+                    description: Created response.
+            schemes:
+                - http
+definitions:
+    AdCreateRequestBody:
+        title: AdCreateRequestBody
+        type: object
+        properties:
+            Country:
+                type: string
+                description: Country of target
+                example: TW
+                enum:
+                    - TW
+                    - JP
+            age_end:
+                type: integer
+                description: End age of target
+                example: 60
+                format: int64
+                maximum: 100
+            age_start:
+                type: integer
+                description: Start age of target
+                example: 18
+                format: int64
+                minimum: 1
+            end_at:
+                type: string
+                description: End time of AD
+                example: "2024-10-01 00:00:00"
+            gender:
+                type: string
+                description: Gender of target
+                example: M
+                enum:
+                    - M
+                    - F
+            platform:
+                type: string
+                description: Platform of target
+                example: ios
+                enum:
+                    - ios
+                    - android
+                    - web
+            start_at:
+                type: string
+                description: Start time of AD
+                example: "2024-01-01 00:00:00"
+            title:
+                type: string
+                description: Title of AD
+                example: AD 1
+        example:
+            Country: TW
+            age_end: 60
+            age_start: 18
+            end_at: "2024-10-01 00:00:00"
+            gender: M
+            platform: ios
+            start_at: "2024-01-01 00:00:00"
+            title: AD 1
+        required:
+            - title
+            - start_at
+            - end_at
+    AdListRequestBody:
+        title: AdListRequestBody
+        type: object
+        properties:
+            Country:
+                type: string
+                description: Country of target
+                example: TW
+                enum:
+                    - TW
+                    - JP
+            age_end:
+                type: integer
+                description: End age of target
+                example: 60
+                format: int64
+                maximum: 100
+            age_start:
+                type: integer
+                description: Start age of target
+                example: 18
+                format: int64
+                minimum: 1
+            gender:
+                type: string
+                description: Gender of target
+                example: M
+                enum:
+                    - M
+                    - F
+            limit:
+                type: integer
+                description: Limit of AD
+                example: 10
+                format: int64
+            offset:
+                type: integer
+                description: Offset of AD
+                example: 0
+                format: int64
+            platform:
+                type: string
+                description: Platform of target
+                example: ios
+                enum:
+                    - ios
+                    - android
+                    - web
+        example:
+            Country: TW
+            age_end: 60
+            age_start: 18
+            gender: M
+            limit: 10
+            offset: 0
+            platform: ios
+        required:
+            - offset
+            - limit
+    AdListResponseBody:
+        title: AdListResponseBody
+        type: object
+        properties:
+            end_at:
+                type: string
+                description: End time of AD
+                example: "2024-10-01 00:00:00"
+            title:
+                type: string
+                description: Title of AD
+                example: AD 1
+        example:
+            end_at: "2024-10-01 00:00:00"
+            title: AD 1
+        required:
+            - title
+            - end_at
