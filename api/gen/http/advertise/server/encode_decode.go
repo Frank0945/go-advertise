@@ -11,6 +11,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
 	advertise "github.com/Frank0945/go-advertise/api/gen/advertise"
 	goahttp "goa.design/goa/v3/http"
@@ -68,21 +69,100 @@ func EncodeListResponse(encoder func(context.Context, http.ResponseWriter) goaht
 func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
 	return func(r *http.Request) (any, error) {
 		var (
-			body ListRequestBody
-			err  error
+			offset   int
+			limit    int
+			ageStart *int
+			ageEnd   *int
+			gender   *string
+			country  *string
+			platform *string
+			err      error
 		)
-		err = decoder(r).Decode(&body)
-		if err != nil {
-			if err == io.EOF {
-				return nil, goa.MissingPayloadError()
+		{
+			offsetRaw := r.URL.Query().Get("offset")
+			if offsetRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("offset", "query string"))
 			}
-			return nil, goa.DecodePayloadError(err.Error())
+			v, err2 := strconv.ParseInt(offsetRaw, 10, strconv.IntSize)
+			if err2 != nil {
+				err = goa.MergeErrors(err, goa.InvalidFieldTypeError("offset", offsetRaw, "integer"))
+			}
+			offset = int(v)
 		}
-		err = ValidateListRequestBody(&body)
+		{
+			limitRaw := r.URL.Query().Get("limit")
+			if limitRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("limit", "query string"))
+			}
+			v, err2 := strconv.ParseInt(limitRaw, 10, strconv.IntSize)
+			if err2 != nil {
+				err = goa.MergeErrors(err, goa.InvalidFieldTypeError("limit", limitRaw, "integer"))
+			}
+			limit = int(v)
+		}
+		{
+			ageStartRaw := r.URL.Query().Get("age_start")
+			if ageStartRaw != "" {
+				v, err2 := strconv.ParseInt(ageStartRaw, 10, strconv.IntSize)
+				if err2 != nil {
+					err = goa.MergeErrors(err, goa.InvalidFieldTypeError("age_start", ageStartRaw, "integer"))
+				}
+				pv := int(v)
+				ageStart = &pv
+			}
+		}
+		if ageStart != nil {
+			if *ageStart < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_start", *ageStart, 1, true))
+			}
+		}
+		{
+			ageEndRaw := r.URL.Query().Get("age_end")
+			if ageEndRaw != "" {
+				v, err2 := strconv.ParseInt(ageEndRaw, 10, strconv.IntSize)
+				if err2 != nil {
+					err = goa.MergeErrors(err, goa.InvalidFieldTypeError("age_end", ageEndRaw, "integer"))
+				}
+				pv := int(v)
+				ageEnd = &pv
+			}
+		}
+		if ageEnd != nil {
+			if *ageEnd > 100 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_end", *ageEnd, 100, false))
+			}
+		}
+		genderRaw := r.URL.Query().Get("gender")
+		if genderRaw != "" {
+			gender = &genderRaw
+		}
+		if gender != nil {
+			if !(*gender == "M" || *gender == "F") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("gender", *gender, []any{"M", "F"}))
+			}
+		}
+		countryRaw := r.URL.Query().Get("country")
+		if countryRaw != "" {
+			country = &countryRaw
+		}
+		if country != nil {
+			if !(*country == "TW" || *country == "JP") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("country", *country, []any{"TW", "JP"}))
+			}
+		}
+		platformRaw := r.URL.Query().Get("platform")
+		if platformRaw != "" {
+			platform = &platformRaw
+		}
+		if platform != nil {
+			if !(*platform == "ios" || *platform == "android" || *platform == "web") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("platform", *platform, []any{"ios", "android", "web"}))
+			}
+		}
 		if err != nil {
 			return nil, err
 		}
-		payload := NewListAdList(&body)
+		payload := NewListAdList(offset, limit, ageStart, ageEnd, gender, country, platform)
 
 		return payload, nil
 	}

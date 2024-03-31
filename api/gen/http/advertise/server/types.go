@@ -20,36 +20,19 @@ type CreateRequestBody struct {
 	// Start time of AD
 	StartAt *string `form:"start_at,omitempty" json:"start_at,omitempty" xml:"start_at,omitempty"`
 	// End time of AD
-	EndAt *string `form:"end_at,omitempty" json:"end_at,omitempty" xml:"end_at,omitempty"`
-	// Start age of target
-	AgeStart *int `form:"age_start,omitempty" json:"age_start,omitempty" xml:"age_start,omitempty"`
-	// End age of target
-	AgeEnd *int `form:"age_end,omitempty" json:"age_end,omitempty" xml:"age_end,omitempty"`
-	// Gender of target
-	Gender *string `form:"gender,omitempty" json:"gender,omitempty" xml:"gender,omitempty"`
-	// Country of target
-	Country *string `form:"Country,omitempty" json:"Country,omitempty" xml:"Country,omitempty"`
-	// Platform of target
-	Platform *string `form:"platform,omitempty" json:"platform,omitempty" xml:"platform,omitempty"`
-}
-
-// ListRequestBody is the type of the "advertise" service "list" endpoint HTTP
-// request body.
-type ListRequestBody struct {
-	// Offset of AD
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty" xml:"offset,omitempty"`
-	// Limit of AD
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty" xml:"limit,omitempty"`
-	// Start age of target
-	AgeStart *int `form:"age_start,omitempty" json:"age_start,omitempty" xml:"age_start,omitempty"`
-	// End age of target
-	AgeEnd *int `form:"age_end,omitempty" json:"age_end,omitempty" xml:"age_end,omitempty"`
-	// Gender of target
-	Gender *string `form:"gender,omitempty" json:"gender,omitempty" xml:"gender,omitempty"`
-	// Country of target
-	Country *string `form:"Country,omitempty" json:"Country,omitempty" xml:"Country,omitempty"`
-	// Platform of target
-	Platform *string `form:"platform,omitempty" json:"platform,omitempty" xml:"platform,omitempty"`
+	EndAt      *string `form:"end_at,omitempty" json:"end_at,omitempty" xml:"end_at,omitempty"`
+	Conditions *struct {
+		// Start age of target
+		AgeStart *int `form:"age_start" json:"age_start" xml:"age_start"`
+		// End age of target
+		AgeEnd *int `form:"age_end" json:"age_end" xml:"age_end"`
+		// Gender of target
+		Gender *string `form:"gender" json:"gender" xml:"gender"`
+		// Country of target
+		Country *string `form:"country" json:"country" xml:"country"`
+		// Platform of target
+		Platform *string `form:"platform" json:"platform" xml:"platform"`
+	} `form:"conditions,omitempty" json:"conditions,omitempty" xml:"conditions,omitempty"`
 }
 
 // ListResponseBody is the type of the "advertise" service "list" endpoint HTTP
@@ -77,30 +60,44 @@ func NewListResponseBody(res []*advertise.Ads) ListResponseBody {
 // NewCreatePayload builds a advertise service create endpoint payload.
 func NewCreatePayload(body *CreateRequestBody) *advertise.CreatePayload {
 	v := &advertise.CreatePayload{
-		Title:    *body.Title,
-		StartAt:  *body.StartAt,
-		EndAt:    *body.EndAt,
-		AgeStart: body.AgeStart,
-		AgeEnd:   body.AgeEnd,
-		Gender:   body.Gender,
-		Country:  body.Country,
-		Platform: body.Platform,
+		Title:   *body.Title,
+		StartAt: *body.StartAt,
+		EndAt:   *body.EndAt,
+	}
+	if body.Conditions != nil {
+		v.Conditions = &struct {
+			// Start age of target
+			AgeStart *int
+			// End age of target
+			AgeEnd *int
+			// Gender of target
+			Gender *string
+			// Country of target
+			Country *string
+			// Platform of target
+			Platform *string
+		}{
+			AgeStart: body.Conditions.AgeStart,
+			AgeEnd:   body.Conditions.AgeEnd,
+			Gender:   body.Conditions.Gender,
+			Country:  body.Conditions.Country,
+			Platform: body.Conditions.Platform,
+		}
 	}
 
 	return v
 }
 
 // NewListAdList builds a advertise service list endpoint payload.
-func NewListAdList(body *ListRequestBody) *advertise.AdList {
-	v := &advertise.AdList{
-		Offset:   *body.Offset,
-		Limit:    *body.Limit,
-		AgeStart: body.AgeStart,
-		AgeEnd:   body.AgeEnd,
-		Gender:   body.Gender,
-		Country:  body.Country,
-		Platform: body.Platform,
-	}
+func NewListAdList(offset int, limit int, ageStart *int, ageEnd *int, gender *string, country *string, platform *string) *advertise.AdList {
+	v := &advertise.AdList{}
+	v.Offset = offset
+	v.Limit = limit
+	v.AgeStart = ageStart
+	v.AgeEnd = ageEnd
+	v.Gender = gender
+	v.Country = country
+	v.Platform = platform
 
 	return v
 }
@@ -116,65 +113,37 @@ func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
 	if body.EndAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("end_at", "body"))
 	}
-	if body.AgeStart != nil {
-		if *body.AgeStart < 1 {
-			err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_start", *body.AgeStart, 1, true))
+	if body.StartAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.start_at", *body.StartAt, goa.FormatDateTime))
+	}
+	if body.EndAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.end_at", *body.EndAt, goa.FormatDateTime))
+	}
+	if body.Conditions != nil {
+		if body.Conditions.AgeStart != nil {
+			if *body.Conditions.AgeStart < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_start", *body.Conditions.AgeStart, 1, true))
+			}
 		}
-	}
-	if body.AgeEnd != nil {
-		if *body.AgeEnd > 100 {
-			err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_end", *body.AgeEnd, 100, false))
+		if body.Conditions.AgeEnd != nil {
+			if *body.Conditions.AgeEnd > 100 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_end", *body.Conditions.AgeEnd, 100, false))
+			}
 		}
-	}
-	if body.Gender != nil {
-		if !(*body.Gender == "M" || *body.Gender == "F") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.gender", *body.Gender, []any{"M", "F"}))
+		if body.Conditions.Gender != nil {
+			if !(*body.Conditions.Gender == "M" || *body.Conditions.Gender == "F") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.conditions.gender", *body.Conditions.Gender, []any{"M", "F"}))
+			}
 		}
-	}
-	if body.Country != nil {
-		if !(*body.Country == "TW" || *body.Country == "JP") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.Country", *body.Country, []any{"TW", "JP"}))
+		if body.Conditions.Country != nil {
+			if !(*body.Conditions.Country == "TW" || *body.Conditions.Country == "JP") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.conditions.country", *body.Conditions.Country, []any{"TW", "JP"}))
+			}
 		}
-	}
-	if body.Platform != nil {
-		if !(*body.Platform == "ios" || *body.Platform == "android" || *body.Platform == "web") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.platform", *body.Platform, []any{"ios", "android", "web"}))
-		}
-	}
-	return
-}
-
-// ValidateListRequestBody runs the validations defined on ListRequestBody
-func ValidateListRequestBody(body *ListRequestBody) (err error) {
-	if body.Offset == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("offset", "body"))
-	}
-	if body.Limit == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("limit", "body"))
-	}
-	if body.AgeStart != nil {
-		if *body.AgeStart < 1 {
-			err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_start", *body.AgeStart, 1, true))
-		}
-	}
-	if body.AgeEnd != nil {
-		if *body.AgeEnd > 100 {
-			err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_end", *body.AgeEnd, 100, false))
-		}
-	}
-	if body.Gender != nil {
-		if !(*body.Gender == "M" || *body.Gender == "F") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.gender", *body.Gender, []any{"M", "F"}))
-		}
-	}
-	if body.Country != nil {
-		if !(*body.Country == "TW" || *body.Country == "JP") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.Country", *body.Country, []any{"TW", "JP"}))
-		}
-	}
-	if body.Platform != nil {
-		if !(*body.Platform == "ios" || *body.Platform == "android" || *body.Platform == "web") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.platform", *body.Platform, []any{"ios", "android", "web"}))
+		if body.Conditions.Platform != nil {
+			if !(*body.Conditions.Platform == "ios" || *body.Conditions.Platform == "android" || *body.Conditions.Platform == "web") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.conditions.platform", *body.Conditions.Platform, []any{"ios", "android", "web"}))
+			}
 		}
 	}
 	return

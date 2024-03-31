@@ -4,6 +4,7 @@ import (
 	"github.com/Frank0945/go-advertise/api/gen/advertise"
 	"github.com/Frank0945/go-advertise/api/gen/http/advertise/server"
 	"github.com/Frank0945/go-advertise/internal/config"
+	"github.com/Frank0945/go-advertise/internal/resources/manager"
 	"github.com/Frank0945/go-advertise/internal/service"
 	"github.com/Frank0945/go-advertise/pkg/goafx/muxfx"
 	"github.com/Frank0945/go-advertise/pkg/httpfx"
@@ -13,6 +14,9 @@ import (
 func main() {
 	fx.New(
 		config.Module,
+
+		// Features
+		manager.Module,
 
 		// Endpoints
 		fx.Provide(
@@ -26,7 +30,7 @@ func main() {
 		// Server
 		fx.Provide(server.New),
 
-		// HTTP Server & Execution
+		// HTTP Server
 		httpfx.Module,
 	).Run()
 }

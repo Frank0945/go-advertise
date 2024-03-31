@@ -20,36 +20,19 @@ type CreateRequestBody struct {
 	// Start time of AD
 	StartAt string `form:"start_at" json:"start_at" xml:"start_at"`
 	// End time of AD
-	EndAt string `form:"end_at" json:"end_at" xml:"end_at"`
-	// Start age of target
-	AgeStart *int `form:"age_start,omitempty" json:"age_start,omitempty" xml:"age_start,omitempty"`
-	// End age of target
-	AgeEnd *int `form:"age_end,omitempty" json:"age_end,omitempty" xml:"age_end,omitempty"`
-	// Gender of target
-	Gender *string `form:"gender,omitempty" json:"gender,omitempty" xml:"gender,omitempty"`
-	// Country of target
-	Country *string `form:"Country,omitempty" json:"Country,omitempty" xml:"Country,omitempty"`
-	// Platform of target
-	Platform *string `form:"platform,omitempty" json:"platform,omitempty" xml:"platform,omitempty"`
-}
-
-// ListRequestBody is the type of the "advertise" service "list" endpoint HTTP
-// request body.
-type ListRequestBody struct {
-	// Offset of AD
-	Offset int `form:"offset" json:"offset" xml:"offset"`
-	// Limit of AD
-	Limit int `form:"limit" json:"limit" xml:"limit"`
-	// Start age of target
-	AgeStart *int `form:"age_start,omitempty" json:"age_start,omitempty" xml:"age_start,omitempty"`
-	// End age of target
-	AgeEnd *int `form:"age_end,omitempty" json:"age_end,omitempty" xml:"age_end,omitempty"`
-	// Gender of target
-	Gender *string `form:"gender,omitempty" json:"gender,omitempty" xml:"gender,omitempty"`
-	// Country of target
-	Country *string `form:"Country,omitempty" json:"Country,omitempty" xml:"Country,omitempty"`
-	// Platform of target
-	Platform *string `form:"platform,omitempty" json:"platform,omitempty" xml:"platform,omitempty"`
+	EndAt      string `form:"end_at" json:"end_at" xml:"end_at"`
+	Conditions *struct {
+		// Start age of target
+		AgeStart *int `form:"age_start" json:"age_start" xml:"age_start"`
+		// End age of target
+		AgeEnd *int `form:"age_end" json:"age_end" xml:"age_end"`
+		// Gender of target
+		Gender *string `form:"gender" json:"gender" xml:"gender"`
+		// Country of target
+		Country *string `form:"country" json:"country" xml:"country"`
+		// Platform of target
+		Platform *string `form:"platform" json:"platform" xml:"platform"`
+	} `form:"conditions,omitempty" json:"conditions,omitempty" xml:"conditions,omitempty"`
 }
 
 // ListResponseBody is the type of the "advertise" service "list" endpoint HTTP
@@ -68,29 +51,29 @@ type AdsResponse struct {
 // "create" endpoint of the "advertise" service.
 func NewCreateRequestBody(p *advertise.CreatePayload) *CreateRequestBody {
 	body := &CreateRequestBody{
-		Title:    p.Title,
-		StartAt:  p.StartAt,
-		EndAt:    p.EndAt,
-		AgeStart: p.AgeStart,
-		AgeEnd:   p.AgeEnd,
-		Gender:   p.Gender,
-		Country:  p.Country,
-		Platform: p.Platform,
+		Title:   p.Title,
+		StartAt: p.StartAt,
+		EndAt:   p.EndAt,
 	}
-	return body
-}
-
-// NewListRequestBody builds the HTTP request body from the payload of the
-// "list" endpoint of the "advertise" service.
-func NewListRequestBody(p *advertise.AdList) *ListRequestBody {
-	body := &ListRequestBody{
-		Offset:   p.Offset,
-		Limit:    p.Limit,
-		AgeStart: p.AgeStart,
-		AgeEnd:   p.AgeEnd,
-		Gender:   p.Gender,
-		Country:  p.Country,
-		Platform: p.Platform,
+	if p.Conditions != nil {
+		body.Conditions = &struct {
+			// Start age of target
+			AgeStart *int `form:"age_start" json:"age_start" xml:"age_start"`
+			// End age of target
+			AgeEnd *int `form:"age_end" json:"age_end" xml:"age_end"`
+			// Gender of target
+			Gender *string `form:"gender" json:"gender" xml:"gender"`
+			// Country of target
+			Country *string `form:"country" json:"country" xml:"country"`
+			// Platform of target
+			Platform *string `form:"platform" json:"platform" xml:"platform"`
+		}{
+			AgeStart: p.Conditions.AgeStart,
+			AgeEnd:   p.Conditions.AgeEnd,
+			Gender:   p.Conditions.Gender,
+			Country:  p.Conditions.Country,
+			Platform: p.Conditions.Platform,
+		}
 	}
 	return body
 }
@@ -113,6 +96,9 @@ func ValidateAdsResponse(body *AdsResponse) (err error) {
 	}
 	if body.EndAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("end_at", "body"))
+	}
+	if body.EndAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.end_at", *body.EndAt, goa.FormatDateTime))
 	}
 	return
 }

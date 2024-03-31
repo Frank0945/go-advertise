@@ -10,6 +10,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	advertise "github.com/Frank0945/go-advertise/api/gen/advertise"
 	goa "goa.design/goa/v3/pkg"
@@ -23,31 +24,35 @@ func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, e
 	{
 		err = json.Unmarshal([]byte(advertiseCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"Country\": \"TW\",\n      \"age_end\": 60,\n      \"age_start\": 18,\n      \"end_at\": \"2024-10-01 00:00:00\",\n      \"gender\": \"M\",\n      \"platform\": \"ios\",\n      \"start_at\": \"2024-01-01 00:00:00\",\n      \"title\": \"AD 1\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"conditions\": {\n         \"age_end\": 60,\n         \"age_start\": 18,\n         \"country\": \"TW\",\n         \"gender\": \"M\",\n         \"platform\": \"ios\"\n      },\n      \"end_at\": \"2024-12-10T03:00:00.000Z\",\n      \"start_at\": \"2024-03-10T03:00:00.000Z\",\n      \"title\": \"AD 1\"\n   }'")
 		}
-		if body.AgeStart != nil {
-			if *body.AgeStart < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_start", *body.AgeStart, 1, true))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.start_at", body.StartAt, goa.FormatDateTime))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.end_at", body.EndAt, goa.FormatDateTime))
+		if body.Conditions != nil {
+			if body.Conditions.AgeStart != nil {
+				if *body.Conditions.AgeStart < 1 {
+					err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_start", *body.Conditions.AgeStart, 1, true))
+				}
 			}
-		}
-		if body.AgeEnd != nil {
-			if *body.AgeEnd > 100 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_end", *body.AgeEnd, 100, false))
+			if body.Conditions.AgeEnd != nil {
+				if *body.Conditions.AgeEnd > 100 {
+					err = goa.MergeErrors(err, goa.InvalidRangeError("body.conditions.age_end", *body.Conditions.AgeEnd, 100, false))
+				}
 			}
-		}
-		if body.Gender != nil {
-			if !(*body.Gender == "M" || *body.Gender == "F") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.gender", *body.Gender, []any{"M", "F"}))
+			if body.Conditions.Gender != nil {
+				if !(*body.Conditions.Gender == "M" || *body.Conditions.Gender == "F") {
+					err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.conditions.gender", *body.Conditions.Gender, []any{"M", "F"}))
+				}
 			}
-		}
-		if body.Country != nil {
-			if !(*body.Country == "TW" || *body.Country == "JP") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.Country", *body.Country, []any{"TW", "JP"}))
+			if body.Conditions.Country != nil {
+				if !(*body.Conditions.Country == "TW" || *body.Conditions.Country == "JP") {
+					err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.conditions.country", *body.Conditions.Country, []any{"TW", "JP"}))
+				}
 			}
-		}
-		if body.Platform != nil {
-			if !(*body.Platform == "ios" || *body.Platform == "android" || *body.Platform == "web") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.platform", *body.Platform, []any{"ios", "android", "web"}))
+			if body.Conditions.Platform != nil {
+				if !(*body.Conditions.Platform == "ios" || *body.Conditions.Platform == "android" || *body.Conditions.Platform == "web") {
+					err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.conditions.platform", *body.Conditions.Platform, []any{"ios", "android", "web"}))
+				}
 			}
 		}
 		if err != nil {
@@ -55,14 +60,29 @@ func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, e
 		}
 	}
 	v := &advertise.CreatePayload{
-		Title:    body.Title,
-		StartAt:  body.StartAt,
-		EndAt:    body.EndAt,
-		AgeStart: body.AgeStart,
-		AgeEnd:   body.AgeEnd,
-		Gender:   body.Gender,
-		Country:  body.Country,
-		Platform: body.Platform,
+		Title:   body.Title,
+		StartAt: body.StartAt,
+		EndAt:   body.EndAt,
+	}
+	if body.Conditions != nil {
+		v.Conditions = &struct {
+			// Start age of target
+			AgeStart *int
+			// End age of target
+			AgeEnd *int
+			// Gender of target
+			Gender *string
+			// Country of target
+			Country *string
+			// Platform of target
+			Platform *string
+		}{
+			AgeStart: body.Conditions.AgeStart,
+			AgeEnd:   body.Conditions.AgeEnd,
+			Gender:   body.Conditions.Gender,
+			Country:  body.Conditions.Country,
+			Platform: body.Conditions.Platform,
+		}
 	}
 
 	return v, nil
@@ -70,52 +90,106 @@ func BuildCreatePayload(advertiseCreateBody string) (*advertise.CreatePayload, e
 
 // BuildListPayload builds the payload for the advertise list endpoint from CLI
 // flags.
-func BuildListPayload(advertiseListBody string) (*advertise.AdList, error) {
+func BuildListPayload(advertiseListOffset string, advertiseListLimit string, advertiseListAgeStart string, advertiseListAgeEnd string, advertiseListGender string, advertiseListCountry string, advertiseListPlatform string) (*advertise.AdList, error) {
 	var err error
-	var body ListRequestBody
+	var offset int
 	{
-		err = json.Unmarshal([]byte(advertiseListBody), &body)
+		var v int64
+		v, err = strconv.ParseInt(advertiseListOffset, 10, strconv.IntSize)
+		offset = int(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"Country\": \"TW\",\n      \"age_end\": 60,\n      \"age_start\": 18,\n      \"gender\": \"M\",\n      \"limit\": 10,\n      \"offset\": 0,\n      \"platform\": \"ios\"\n   }'")
-		}
-		if body.AgeStart != nil {
-			if *body.AgeStart < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_start", *body.AgeStart, 1, true))
-			}
-		}
-		if body.AgeEnd != nil {
-			if *body.AgeEnd > 100 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("body.age_end", *body.AgeEnd, 100, false))
-			}
-		}
-		if body.Gender != nil {
-			if !(*body.Gender == "M" || *body.Gender == "F") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.gender", *body.Gender, []any{"M", "F"}))
-			}
-		}
-		if body.Country != nil {
-			if !(*body.Country == "TW" || *body.Country == "JP") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.Country", *body.Country, []any{"TW", "JP"}))
-			}
-		}
-		if body.Platform != nil {
-			if !(*body.Platform == "ios" || *body.Platform == "android" || *body.Platform == "web") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.platform", *body.Platform, []any{"ios", "android", "web"}))
-			}
-		}
-		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid value for offset, must be INT")
 		}
 	}
-	v := &advertise.AdList{
-		Offset:   body.Offset,
-		Limit:    body.Limit,
-		AgeStart: body.AgeStart,
-		AgeEnd:   body.AgeEnd,
-		Gender:   body.Gender,
-		Country:  body.Country,
-		Platform: body.Platform,
+	var limit int
+	{
+		var v int64
+		v, err = strconv.ParseInt(advertiseListLimit, 10, strconv.IntSize)
+		limit = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for limit, must be INT")
+		}
 	}
+	var ageStart *int
+	{
+		if advertiseListAgeStart != "" {
+			var v int64
+			v, err = strconv.ParseInt(advertiseListAgeStart, 10, strconv.IntSize)
+			val := int(v)
+			ageStart = &val
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for ageStart, must be INT")
+			}
+			if *ageStart < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_start", *ageStart, 1, true))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var ageEnd *int
+	{
+		if advertiseListAgeEnd != "" {
+			var v int64
+			v, err = strconv.ParseInt(advertiseListAgeEnd, 10, strconv.IntSize)
+			val := int(v)
+			ageEnd = &val
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for ageEnd, must be INT")
+			}
+			if *ageEnd > 100 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("age_end", *ageEnd, 100, false))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var gender *string
+	{
+		if advertiseListGender != "" {
+			gender = &advertiseListGender
+			if !(*gender == "M" || *gender == "F") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("gender", *gender, []any{"M", "F"}))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var country *string
+	{
+		if advertiseListCountry != "" {
+			country = &advertiseListCountry
+			if !(*country == "TW" || *country == "JP") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("country", *country, []any{"TW", "JP"}))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var platform *string
+	{
+		if advertiseListPlatform != "" {
+			platform = &advertiseListPlatform
+			if !(*platform == "ios" || *platform == "android" || *platform == "web") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("platform", *platform, []any{"ios", "android", "web"}))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	v := &advertise.AdList{}
+	v.Offset = offset
+	v.Limit = limit
+	v.AgeStart = ageStart
+	v.AgeEnd = ageEnd
+	v.Gender = gender
+	v.Country = country
+	v.Platform = platform
 
 	return v, nil
 }

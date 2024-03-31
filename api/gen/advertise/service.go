@@ -68,15 +68,17 @@ type CreatePayload struct {
 	// Start time of AD
 	StartAt string
 	// End time of AD
-	EndAt string
-	// Start age of target
-	AgeStart *int
-	// End age of target
-	AgeEnd *int
-	// Gender of target
-	Gender *string
-	// Country of target
-	Country *string
-	// Platform of target
-	Platform *string
+	EndAt      string
+	Conditions *struct {
+		// Start age of target
+		AgeStart *int
+		// End age of target
+		AgeEnd *int
+		// Gender of target
+		Gender *string
+		// Country of target
+		Country *string
+		// Platform of target
+		Platform *string
+	}
 }

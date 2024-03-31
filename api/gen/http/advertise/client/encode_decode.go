@@ -10,6 +10,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -100,10 +101,25 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		if !ok {
 			return goahttp.ErrInvalidType("advertise", "list", "*advertise.AdList", v)
 		}
-		body := NewListRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("advertise", "list", err)
+		values := req.URL.Query()
+		values.Add("offset", fmt.Sprintf("%v", p.Offset))
+		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		if p.AgeStart != nil {
+			values.Add("age_start", fmt.Sprintf("%v", *p.AgeStart))
 		}
+		if p.AgeEnd != nil {
+			values.Add("age_end", fmt.Sprintf("%v", *p.AgeEnd))
+		}
+		if p.Gender != nil {
+			values.Add("gender", *p.Gender)
+		}
+		if p.Country != nil {
+			values.Add("country", *p.Country)
+		}
+		if p.Platform != nil {
+			values.Add("platform", *p.Platform)
+		}
+		req.URL.RawQuery = values.Encode()
 		return nil
 	}
 }
