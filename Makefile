@@ -1,7 +1,7 @@
 #! /usr/bin/make
 
 MODULE=$(shell go list -m)
-MIGRATION_PATH = $(CURDIR)/pkg/databasefx/migrationfx/migrations
+MIGRATION_PATH = $(CURDIR)/pkg/databasefx/migrations
 POSTGRESQL_URL = postgres://postgres:postgres@localhost:5432/advertise?sslmode=disable
 
 export POSTGRESQL_URL
