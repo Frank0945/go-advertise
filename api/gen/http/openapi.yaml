@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-    title: AD Service
-    description: This service provides the AD service
+    title: Manager Service
+    description: This service manages the ADs
     version: 0.0.1
 host: localhost:8000
 consumes:
@@ -16,10 +16,10 @@ paths:
     /ad:
         get:
             tags:
-                - advertise
+                - manager
             summary: List all ADs by filter
             description: List all ADs by filter
-            operationId: advertise#list_ads
+            operationId: manager#list_ads
             parameters:
                 - name: offset
                   in: query
@@ -53,27 +53,29 @@ paths:
                   in: query
                   description: Gender of target
                   required: false
-                  type: string
-                  enum:
-                    - M
-                    - F
+                  type: array
+                  items:
+                    type: string
+                    pattern: M|F
+                  collectionFormat: multi
                 - name: country
                   in: query
                   description: Country of target
                   required: false
-                  type: string
-                  enum:
-                    - TW
-                    - JP
+                  type: array
+                  items:
+                    type: string
+                    pattern: TW|JP
+                  collectionFormat: multi
                 - name: platform
                   in: query
                   description: Platform of target
                   required: false
-                  type: string
-                  enum:
-                    - ios
-                    - android
-                    - web
+                  type: array
+                  items:
+                    type: string
+                    pattern: ios|android|web
+                  collectionFormat: multi
             responses:
                 "200":
                     description: OK response.
@@ -85,16 +87,16 @@ paths:
                 - http
         post:
             tags:
-                - advertise
+                - manager
             summary: Create a new AD
             description: Create a new edge
-            operationId: advertise#create_ad
+            operationId: manager#create_ad
             parameters:
                 - name: create_ad_request_body
                   in: body
                   required: true
                   schema:
-                    $ref: '#/definitions/AdvertiseCreateAdRequestBody'
+                    $ref: '#/definitions/ManagerCreateAdRequestBody'
                     required:
                         - title
                         - start_at
@@ -103,7 +105,7 @@ paths:
                 "201":
                     description: Created response.
                     schema:
-                        $ref: '#/definitions/AdvertiseCreateAdResponseBody'
+                        $ref: '#/definitions/ManagerCreateAdResponseBody'
                         required:
                             - id
             schemes:
@@ -131,8 +133,8 @@ definitions:
         required:
             - title
             - end_at
-    AdvertiseCreateAdRequestBody:
-        title: AdvertiseCreateAdRequestBody
+    ManagerCreateAdRequestBody:
+        title: ManagerCreateAdRequestBody
         type: object
         properties:
             conditions:
@@ -153,33 +155,49 @@ definitions:
                         minimum: 1
                         maximum: 100
                     country:
-                        type: string
+                        type: array
+                        items:
+                            type: string
+                            example: TW
+                            pattern: TW|JP
                         description: Country of target
-                        example: TW
-                        enum:
+                        example:
                             - TW
                             - JP
                     gender:
-                        type: string
+                        type: array
+                        items:
+                            type: string
+                            example: F
+                            pattern: M|F
                         description: Gender of target
-                        example: M
-                        enum:
+                        example:
                             - M
                             - F
                     platform:
-                        type: string
+                        type: array
+                        items:
+                            type: string
+                            example: ios
+                            pattern: ios|android|web
                         description: Platform of target
-                        example: ios
-                        enum:
+                        example:
                             - ios
                             - android
                             - web
                 example:
                     age_end: 60
                     age_start: 18
-                    country: TW
-                    gender: M
-                    platform: ios
+                    country:
+                        - TW
+                        - JP
+                    gender:
+                        - M
+                        - F
+                    platform:
+                        - ios
+                        - android
+                        - web
             end_at:
                 type: string
                 description: End time of AD
@@ -200,9 +218,16 @@ definitions:
             conditions:
                 age_end: 60
                 age_start: 18
-                country: TW
-                gender: M
-                platform: ios
+                country:
+                    - TW
+                    - JP
+                gender:
+                    - M
+                    - F
+                platform:
+                    - ios
+                    - android
+                    - web
             end_at: "2024-12-10T03:00:00.000Z"
             start_at: "2024-03-10T03:00:00.000Z"
             title: AD 1
@@ -210,16 +235,15 @@ definitions:
             - title
             - start_at
             - end_at
-    AdvertiseCreateAdResponseBody:
-        title: AdvertiseCreateAdResponseBody
+    ManagerCreateAdResponseBody:
+        title: ManagerCreateAdResponseBody
         type: object
         properties:
             id:
-                type: integer
+                type: string
                 description: ID of the AD
-                example: 34
-                format: int64
+                example: "34"
         example:
-            id: 34
+            id: "34"
         required:
             - id

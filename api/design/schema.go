@@ -4,6 +4,18 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
+var Genders = ArrayOf(String, func() {
+	Pattern("M|F")
+})
+
+var Countries = ArrayOf(String, func() {
+	Pattern("TW|JP")
+})
+
+var Platforms = ArrayOf(String, func() {
+	Pattern("ios|android|web")
+})
+
 var Ad = Type("Ad", func() {
 	Description("List all ads by filter")
 
@@ -20,7 +32,7 @@ var Ad = Type("Ad", func() {
 	Required("title", "end_at")
 })
 
-var AdOverview = Type("AdOverview", func() {
+var AdQuery = Type("AdQuery", func() {
 	Description("Search AD payload")
 
 	Field(0, "offset", Int, "Offset of AD", func() {
@@ -43,17 +55,14 @@ var AdOverview = Type("AdOverview", func() {
 		Maximum(100)
 		Example(60)
 	})
-	Field(4, "gender", String, "Gender of target", func() {
-		Enum("M", "F")
-		Example("M")
+	Field(0, "gender", Genders, "Gender of target", func() {
+		Example([]string{"M", "F"})
 	})
-	Field(5, "country", String, "Country of target", func() {
-		Enum("TW", "JP")
-		Example("TW")
+	Field(1, "country", Countries, "Country of target", func() {
+		Example([]string{"TW", "JP"})
 	})
-	Field(6, "platform", String, "Platform of target", func() {
-		Enum("ios", "android", "web")
-		Example("ios")
+	Field(2, "platform", Platforms, "Platform of target", func() {
+		Example([]string{"ios", "android", "web"})
 	})
 
 	Required("offset", "limit")

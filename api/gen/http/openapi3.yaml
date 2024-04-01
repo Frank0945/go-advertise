@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-    title: AD Service
-    description: This service provides the AD service
+    title: Manager Service
+    description: This service manages the ADs
     version: 0.0.1
 servers:
     - url: http://localhost:8000
@@ -9,10 +9,10 @@ paths:
     /ad:
         get:
             tags:
-                - advertise
+                - manager
             summary: List all ADs by filter
             description: List all ADs by filter
-            operationId: advertise#list_ads
+            operationId: manager#list_ads
             parameters:
                 - name: offset
                   in: query
@@ -69,38 +69,54 @@ paths:
                   description: Gender of target
                   allowEmptyValue: true
                   schema:
-                    type: string
+                    type: array
+                    items:
+                        type: string
+                        example: F
+                        pattern: M|F
                     description: Gender of target
-                    example: M
-                    enum:
+                    example:
                         - M
                         - F
-                  example: M
+                  example:
+                    - M
+                    - F
                 - name: country
                   in: query
                   description: Country of target
                   allowEmptyValue: true
                   schema:
-                    type: string
+                    type: array
+                    items:
+                        type: string
+                        example: JP
+                        pattern: TW|JP
                     description: Country of target
-                    example: TW
-                    enum:
+                    example:
                         - TW
                         - JP
-                  example: TW
+                  example:
+                    - TW
+                    - JP
                 - name: platform
                   in: query
                   description: Platform of target
                   allowEmptyValue: true
                   schema:
-                    type: string
+                    type: array
+                    items:
+                        type: string
+                        example: ios
+                        pattern: ios|android|web
                     description: Platform of target
-                    example: ios
-                    enum:
+                    example:
                         - ios
                         - android
                         - web
-                  example: ios
+                  example:
+                    - ios
+                    - android
+                    - web
             responses:
                 "200":
                     description: OK response.
@@ -115,21 +131,19 @@ paths:
                                       title: AD 1
                                     - end_at: "2024-12-10T03:00:00.000Z"
                                       title: AD 1
-                                    - end_at: "2024-12-10T03:00:00.000Z"
-                                      title: AD 1
-                                    - end_at: "2024-12-10T03:00:00.000Z"
-                                      title: AD 1
                             example:
+                                - end_at: "2024-12-10T03:00:00.000Z"
+                                  title: AD 1
                                 - end_at: "2024-12-10T03:00:00.000Z"
                                   title: AD 1
                                 - end_at: "2024-12-10T03:00:00.000Z"
                                   title: AD 1
         post:
             tags:
-                - advertise
+                - manager
             summary: Create a new AD
             description: Create a new edge
-            operationId: advertise#create_ad
+            operationId: manager#create_ad
             requestBody:
                 required: true
                 content:
@@ -140,9 +154,16 @@ paths:
                             conditions:
                                 age_end: 60
                                 age_start: 18
-                                country: TW
-                                gender: M
-                                platform: ios
+                                country:
+                                    - TW
+                                    - JP
+                                gender:
+                                    - M
+                                    - F
+                                platform:
+                                    - ios
+                                    - android
+                                    - web
                             end_at: "2024-12-10T03:00:00.000Z"
                             start_at: "2024-03-10T03:00:00.000Z"
                             title: AD 1
@@ -154,7 +175,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/CreateAdResponseBody'
                             example:
-                                id: 34
+                                id: "34"
 components:
     schemas:
         Ad:
@@ -199,33 +220,49 @@ components:
                             minimum: 1
                             maximum: 100
                         country:
-                            type: string
+                            type: array
+                            items:
+                                type: string
+                                example: JP
+                                pattern: TW|JP
                             description: Country of target
-                            example: TW
-                            enum:
+                            example:
                                 - TW
                                 - JP
                         gender:
-                            type: string
+                            type: array
+                            items:
+                                type: string
+                                example: M
+                                pattern: M|F
                             description: Gender of target
-                            example: M
-                            enum:
+                            example:
                                 - M
                                 - F
                         platform:
-                            type: string
+                            type: array
+                            items:
+                                type: string
+                                example: ios
+                                pattern: ios|android|web
                             description: Platform of target
-                            example: ios
-                            enum:
+                            example:
                                 - ios
                                 - android
                                 - web
                     example:
                         age_end: 60
                         age_start: 18
-                        country: TW
-                        gender: M
-                        platform: ios
+                        country:
+                            - TW
+                            - JP
+                        gender:
+                            - M
+                            - F
+                        platform:
+                            - ios
+                            - android
+                            - web
                 end_at:
                     type: string
                     description: End time of AD
@@ -246,9 +283,16 @@ components:
                 conditions:
                     age_end: 60
                     age_start: 18
-                    country: TW
-                    gender: M
-                    platform: ios
+                    country:
+                        - TW
+                        - JP
+                    gender:
+                        - M
+                        - F
+                    platform:
+                        - ios
+                        - android
+                        - web
                 end_at: "2024-12-10T03:00:00.000Z"
                 start_at: "2024-03-10T03:00:00.000Z"
                 title: AD 1
@@ -260,13 +304,12 @@ components:
             type: object
             properties:
                 id:
-                    type: integer
+                    type: string
                     description: ID of the AD
-                    example: 34
-                    format: int64
+                    example: "34"
             example:
-                id: 34
+                id: "34"
             required:
                 - id
 tags:
-    - name: advertise
+    - name: manager

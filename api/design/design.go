@@ -4,18 +4,18 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-var _ = API("advertise", func() {
-	Title("AD Service")
-	Description("This service provides the AD service")
-	Server("advertise", func() {
+var _ = API("manager", func() {
+	Title("Manager Service")
+	Description("This service manages the ADs")
+	Server("manager", func() {
 		Host("localhost", func() {
 			URI("http://localhost:8000")
 		})
-		Services("advertise")
+		Services("manager")
 	})
 })
 
-var _ = Service("advertise", func() {
+var _ = Service("manager", func() {
 	Method("create_ad", func() {
 		Meta("openapi:summary", "Create a new AD")
 		Description("Create a new edge")
@@ -44,25 +44,22 @@ var _ = Service("advertise", func() {
 					Maximum(100)
 					Example(60)
 				})
-				Attribute("gender", String, "Gender of target", func() {
-					Enum("M", "F")
-					Example("M")
+				Attribute("gender", Genders, "Gender of target", func() {
+					Example([]string{"M", "F"})
 				})
-				Attribute("country", String, "Country of target", func() {
-					Enum("TW", "JP")
-					Example("TW")
+				Attribute("country", Countries, "Country of target", func() {
+					Example([]string{"TW", "JP"})
 				})
-				Attribute("platform", String, "Platform of target", func() {
-					Enum("ios", "android", "web")
-					Example("ios")
+				Attribute("platform", Platforms, "Platform of target", func() {
+					Example([]string{"ios", "android", "web"})
 				})
 			})
 
 			Required("title", "start_at", "end_at")
 		})
 		Result(func() {
-			Field(1, "id", Int, "ID of the AD", func() {
-				Example(34)
+			Field(1, "id", String, "ID of the AD", func() {
+				Example("34")
 			})
 
 			Required("id")
@@ -78,7 +75,7 @@ var _ = Service("advertise", func() {
 		Meta("openapi:summary", "List all ADs by filter")
 		Description("List all ADs by filter")
 
-		Payload(AdOverview)
+		Payload(AdQuery)
 		Result(ArrayOf(Ad))
 		HTTP(func() {
 			GET("ad")

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/Frank0945/go-advertise/api/gen/advertise"
-	"github.com/Frank0945/go-advertise/api/gen/http/advertise/server"
+	"github.com/Frank0945/go-advertise/api/gen/http/manager/server"
+	"github.com/Frank0945/go-advertise/api/gen/manager"
 	"github.com/Frank0945/go-advertise/internal/config"
-	"github.com/Frank0945/go-advertise/internal/resources/manage"
+	"github.com/Frank0945/go-advertise/internal/entities/advertise"
+	adResource "github.com/Frank0945/go-advertise/internal/resources/advertise"
 	"github.com/Frank0945/go-advertise/internal/service"
 	"github.com/Frank0945/go-advertise/pkg/databasefx"
 	"github.com/Frank0945/go-advertise/pkg/goafx/muxfx"
@@ -18,12 +19,19 @@ func main() {
 		config.Module,
 
 		// Features
-		manage.Module,
+		adResource.Module,
 
 		// Endpoints
 		fx.Provide(
 			service.New,
-			advertise.NewEndpoints,
+			manager.NewEndpoints,
+		),
+
+		fx.Provide(
+			fx.Annotate(
+				advertise.NewAdMapper,
+				fx.As(new(advertise.AdMapper)),
+			),
 		),
 
 		// Muxer

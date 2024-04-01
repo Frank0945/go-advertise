@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 
-	api "github.com/Frank0945/go-advertise/api/gen/advertise"
+	api "github.com/Frank0945/go-advertise/api/gen/manager"
 	"go.uber.org/fx"
 )
 
 type ManageHandler interface {
 	CreateAd(context.Context, *api.CreateAdPayload) (*api.CreateAdResult, error)
-	ListAds(context.Context, *api.AdOverview) ([]*api.Ad, error)
+	ListAds(context.Context, *api.AdQuery) ([]*api.Ad, error)
 }
 
 type service struct {
