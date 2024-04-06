@@ -18,12 +18,33 @@ func NewAdMapper(db *sqlx.DB) *adMapper {
 }
 
 func (a *adMapper) Create(ctx context.Context, ad *AdOverview) (string, error) {
+	tx, err := a.db.BeginTxx(ctx, nil)
+	defer tx.Rollback()
+
+	if err != nil {
+		return "", err
+	}
+
+	if err := a.increaseDailyAdCount(tx); err != nil {
+		return "", err
+	}
+
+	insertedID, err := a.createAd(tx, ad)
+	if err != nil {
+		return "", err
+	}
+
+	return insertedID, tx.Commit()
+}
+
+func (a *adMapper) createAd(tx *sqlx.Tx, ad *AdOverview) (string, error) {
 	query := `
 		INSERT INTO advertisement (title, start_at, end_at, age_start, age_end, gender, country, platform)
 		VALUES (:title, :start_at, :end_at, :age_start, :age_end, :gender, :country, :platform)
 		RETURNING id
 	`
-	rows, err := a.db.NamedQueryContext(ctx, query, ad)
+
+	rows, err := tx.NamedQuery(query, ad)
 	if err != nil {
 		return "", err
 	}
@@ -31,11 +52,25 @@ func (a *adMapper) Create(ctx context.Context, ad *AdOverview) (string, error) {
 	var insertedID string
 	if rows.Next() {
 		if err := rows.Scan(&insertedID); err != nil {
-			return "", fmt.Errorf("%s", err)
+			return "", err
 		}
 	}
 
 	return insertedID, err
+}
+
+func (a *adMapper) increaseDailyAdCount(tx *sqlx.Tx) error {
+	query := `
+		INSERT INTO daily_ad_count (date, count)
+		VALUES (CURRENT_DATE, 1)
+		ON CONFLICT (date)
+		DO UPDATE SET count = daily_ad_count.count + 1
+	`
+	_, err := tx.Exec(query)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *adMapper) List(ctx context.Context, q *AdQuery) ([]*Ad, error) {
@@ -69,7 +104,7 @@ func (a *adMapper) List(ctx context.Context, q *AdQuery) ([]*Ad, error) {
 	ads := []*Ad{}
 	err := a.db.SelectContext(ctx, &ads, query)
 	if err != nil {
-		return nil, fmt.Errorf(query)
+		return nil, err
 	}
 
 	return ads, nil
