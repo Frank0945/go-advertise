@@ -77,20 +77,20 @@ func (a *adMapper) List(ctx context.Context, q *AdQuery) ([]*Ad, error) {
 	whereQuery := `
 		WHERE start_at < CURRENT_TIMESTAMP AND end_at > CURRENT_TIMESTAMP
 	`
-	if q.AgeStart != nil {
-		whereQuery += fmt.Sprintf(" AND age_start >= %d", *q.AgeStart)
+	if q.AgeStart.Valid {
+		whereQuery += fmt.Sprintf(" AND age_start >= %d", q.AgeStart.Int64)
 	}
-	if q.AgeEnd != nil {
-		whereQuery += fmt.Sprintf(" AND age_end <= %d", *q.AgeEnd)
+	if q.AgeEnd.Valid {
+		whereQuery += fmt.Sprintf(" AND age_end <= %d", q.AgeEnd.Int64)
 	}
-	if q.Gender != nil {
-		whereQuery += fmt.Sprintf(" AND gender @> '%s'", *q.Gender)
+	if q.Gender.Valid {
+		whereQuery += fmt.Sprintf(" AND gender @> '%s'", q.Gender.String)
 	}
-	if q.Country != nil {
-		whereQuery += fmt.Sprintf(" AND country @> '%s'", *q.Country)
+	if q.Country.Valid {
+		whereQuery += fmt.Sprintf(" AND country @> '%s'", q.Country.String)
 	}
-	if q.Platform != nil {
-		whereQuery += fmt.Sprintf(" AND platform @> '%s'", *q.Platform)
+	if q.Platform.Valid {
+		whereQuery += fmt.Sprintf(" AND platform @> '%s'", q.Platform.String)
 	}
 
 	query := fmt.Sprintf(`

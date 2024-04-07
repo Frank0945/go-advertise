@@ -7,7 +7,8 @@ import (
 
 	api "github.com/Frank0945/go-advertise/api/gen/manager"
 	"github.com/Frank0945/go-advertise/internal/entities/advertise"
-	. "github.com/Frank0945/go-advertise/internal/utils"
+	"github.com/Frank0945/go-advertise/internal/utils/slice"
+	"github.com/Frank0945/go-advertise/internal/utils/sqlconv"
 )
 
 type Handler struct {
@@ -27,17 +28,17 @@ func (h *Handler) CreateAd(ctx context.Context, p *api.CreateAdPayload) (*api.Cr
 		EndAt:   p.EndAt,
 	}
 	if p.Conditions != nil {
-		adOverviewEntity.AgeStart = p.Conditions.AgeStart
-		adOverviewEntity.AgeEnd = p.Conditions.AgeEnd
+		adOverviewEntity.AgeStart = sqlconv.ConvToNullInt64(p.Conditions.AgeStart)
+		adOverviewEntity.AgeEnd = sqlconv.ConvToNullInt64(p.Conditions.AgeEnd)
 
-		gender := ConvSlicToStr(RmDupStrSlic(p.Conditions.Gender))
-		adOverviewEntity.Gender = &gender
+		gender := slice.ConvSlicToStr(slice.RmDupStrSlic(p.Conditions.Gender))
+		adOverviewEntity.Gender = sqlconv.ConvToNullStr(&gender)
 
-		country := ConvSlicToStr(RmDupStrSlic(p.Conditions.Country))
-		adOverviewEntity.Country = &country
+		country := slice.ConvSlicToStr(slice.RmDupStrSlic(p.Conditions.Country))
+		adOverviewEntity.Country = sqlconv.ConvToNullStr(&country)
 
-		platform := ConvSlicToStr(RmDupStrSlic(p.Conditions.Platform))
-		adOverviewEntity.Platform = &platform
+		platform := slice.ConvSlicToStr(slice.RmDupStrSlic(p.Conditions.Platform))
+		adOverviewEntity.Platform = sqlconv.ConvToNullStr(&platform)
 	}
 
 	id, err := h.manager.CreateAd(ctx, adOverviewEntity)
@@ -53,18 +54,18 @@ func (h *Handler) CreateAd(ctx context.Context, p *api.CreateAdPayload) (*api.Cr
 func (h *Handler) ListAds(ctx context.Context, q *api.AdQuery) ([]*api.Ad, error) {
 	res := []*api.Ad{}
 
-	gender := ConvSlicToStr(RmDupStrSlic(q.Gender))
-	country := ConvSlicToStr(RmDupStrSlic(q.Country))
-	platform := ConvSlicToStr(RmDupStrSlic(q.Platform))
+	gender := slice.ConvSlicToStr(slice.RmDupStrSlic(q.Gender))
+	country := slice.ConvSlicToStr(slice.RmDupStrSlic(q.Country))
+	platform := slice.ConvSlicToStr(slice.RmDupStrSlic(q.Platform))
 
 	queryEntity := &advertise.AdQuery{
 		Offset:   q.Offset,
 		Limit:    q.Limit,
-		AgeStart: q.AgeStart,
-		AgeEnd:   q.AgeEnd,
-		Gender:   &gender,
-		Country:  &country,
-		Platform: &platform,
+		AgeStart: sqlconv.ConvToNullInt64(q.AgeStart),
+		AgeEnd:   sqlconv.ConvToNullInt64(q.AgeEnd),
+		Gender:   sqlconv.ConvToNullStr(&gender),
+		Country:  sqlconv.ConvToNullStr(&country),
+		Platform: sqlconv.ConvToNullStr(&platform),
 	}
 
 	ads, err := h.manager.ListAds(ctx, queryEntity)

@@ -23,8 +23,8 @@ func NewManager(mapper advertise.AdMapper) *manager {
 }
 
 func (m *manager) CreateAd(ctx context.Context, ad *advertise.AdOverview) (string, error) {
-	if ad.AgeEnd != nil && ad.AgeStart != nil {
-		if *ad.AgeEnd < *ad.AgeStart {
+	if ad.AgeEnd.Valid && ad.AgeStart.Valid {
+		if ad.AgeEnd.Int64 < ad.AgeStart.Int64 {
 			return "", fmt.Errorf("`age_end` must be greater than/equal to `age_start`")
 		}
 	}

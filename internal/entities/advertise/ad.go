@@ -2,6 +2,7 @@ package advertise
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -11,24 +12,24 @@ type Ad struct {
 }
 
 type AdOverview struct {
-	Title    string  `db:"title"`
-	StartAt  string  `db:"start_at"`
-	EndAt    string  `db:"end_at"`
-	AgeStart *int    `db:"age_start"`
-	AgeEnd   *int    `db:"age_end"`
-	Gender   *string `db:"gender"`
-	Country  *string `db:"country"`
-	Platform *string `db:"platform"`
+	Title    string         `db:"title"`
+	StartAt  string         `db:"start_at"`
+	EndAt    string         `db:"end_at"`
+	AgeStart sql.NullInt64  `db:"age_start"`
+	AgeEnd   sql.NullInt64  `db:"age_end"`
+	Gender   sql.NullString `db:"gender"`
+	Country  sql.NullString `db:"country"`
+	Platform sql.NullString `db:"platform"`
 }
 
 type AdQuery struct {
-	Offset   int     `db:"offset"`
-	Limit    int     `db:"limit"`
-	AgeStart *int    `db:"age_start"`
-	AgeEnd   *int    `db:"age_end"`
-	Gender   *string `db:"gender"`
-	Country  *string `db:"country"`
-	Platform *string `db:"platform"`
+	Offset   int            `db:"offset"`
+	Limit    int            `db:"limit"`
+	AgeStart sql.NullInt64  `db:"age_start"`
+	AgeEnd   sql.NullInt64  `db:"age_end"`
+	Gender   sql.NullString `db:"gender"`
+	Country  sql.NullString `db:"country"`
+	Platform sql.NullString `db:"platform"`
 }
 
 type AdMapper interface {
