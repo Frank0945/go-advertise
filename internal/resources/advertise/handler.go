@@ -27,6 +27,7 @@ func (h *Handler) CreateAd(ctx context.Context, p *api.CreateAdPayload) (*api.Cr
 		StartAt: p.StartAt,
 		EndAt:   p.EndAt,
 	}
+	// Convert the conditions to required format for the entity
 	if p.Conditions != nil {
 		adOverviewEntity.AgeStart = sqlconv.ConvToNullInt64(p.Conditions.AgeStart)
 		adOverviewEntity.AgeEnd = sqlconv.ConvToNullInt64(p.Conditions.AgeEnd)
@@ -41,6 +42,7 @@ func (h *Handler) CreateAd(ctx context.Context, p *api.CreateAdPayload) (*api.Cr
 		adOverviewEntity.Platform = sqlconv.ConvToNullStr(&platform)
 	}
 
+	// Call the manager to create the AD
 	id, err := h.manager.CreateAd(ctx, adOverviewEntity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create AD: %w", err)
@@ -73,6 +75,7 @@ func (h *Handler) ListAds(ctx context.Context, q *api.AdQuery) ([]*api.Ad, error
 		return nil, fmt.Errorf("failed to list ADs: %w", err)
 	}
 
+	// Convert the entity to the required format
 	for _, ad := range ads {
 		res = append(res, &api.Ad{
 			Title: ad.Title,

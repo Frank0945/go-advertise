@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/AnatolyRugalev/goregen v0.1.0 // indirect
+	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598 // indirect
 	github.com/go-chi/chi/v5 v5.0.12 // indirect
 	github.com/google/uuid v1.6.0 // indirect
